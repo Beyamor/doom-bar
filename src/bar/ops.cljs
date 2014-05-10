@@ -11,10 +11,11 @@
       (bit-and 0x10)
       zero? not))
 
-(def addr-e
+(defn addr
+  [r]
   [1 4
    (fn [{:keys [registers] :as system}]
-     (let [result (+ (:a registers) (:e registers))
+     (let [result (+ (registers :a) (registers r))
            truncated-result (truncate result)]
        (-> system
            (set-registers :a truncated-result
@@ -22,7 +23,7 @@
            (->/in [:registers]
                   (registers/set-flags
                     :carry       (> result 255)
-                    :half-carry  (half-carried? (:a registers) (:e registers) truncated-result)
+                    :half-carry  (half-carried? (registers :a) (registers r) truncated-result)
                     :zero        (zero? truncated-result))))))])
 
 (defn execute
