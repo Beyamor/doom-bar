@@ -20,3 +20,9 @@
 (defn load
   [memory address]
   (get memory (mapped-address address)))
+
+(defn set-bios
+  [memory bios]
+  (-> bios
+      (concat (subvec memory (count bios)))
+      vec))

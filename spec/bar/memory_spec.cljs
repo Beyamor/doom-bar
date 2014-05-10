@@ -23,4 +23,11 @@
               (should= 23
                        (-> memory/zeroed
                            (memory/store 0xE000 23)
-                           (memory/load 0xC000)))))
+                           (memory/load 0xC000))))
+
+          (it "should have a settable bios"
+              (let [memory (-> memory/zeroed
+                               (memory/set-bios [1 2 3]))]
+                (should= 1 (memory/load memory 0))
+                (should= 2 (memory/load memory 1))
+                (should= 3 (memory/load memory 2)))))
