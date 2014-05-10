@@ -1,5 +1,5 @@
 (ns bar.ops
-  (:require [bar.register :as register])
+  (:require [bar.registers :as registers])
   (:require-macros [lonocloud.synthread :as ->])
   (:refer-clojure :exclude [apply]))
 
@@ -13,20 +13,20 @@
 
 (def addr-e
   [1 4
-   (fn [register]
-     (let [result (+ (:a register) (:e register))
+   (fn [registers]
+     (let [result (+ (:a registers) (:e registers))
            truncated-result (truncate result)]
-       (-> register
+       (-> registers
            (assoc :a truncated-result)
            (assoc :f 0)
-           (register/set-flags
+           (registers/set-flags
              :carry       (> result 255)
-             :half-carry  (half-carried? (:a register) (:e register) truncated-result)
+             :half-carry  (half-carried? (:a registers) (:e registers) truncated-result)
              :zero        (zero? truncated-result)))))])
 
 (defn apply
-  [register [m t f]]
-  (-> register
+  [registers [m t f]]
+  (-> registers
       f
       (assoc :m m)
       (assoc :t t)))

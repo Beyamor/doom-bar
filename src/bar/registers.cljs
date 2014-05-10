@@ -1,4 +1,4 @@
-(ns bar.register
+(ns bar.registers
   (:require-macros [lonocloud.synthread :as ->]))
 
 (def zeroed
@@ -15,23 +15,23 @@
    :half-carry 0x20})
 
 (defn flag-set?
-  [register flag-name]
+  [registers flag-name]
   (let [flag (get flags flag-name)]
-    (-> register :f (bit-and flag) (= flag))))
+    (-> registers :f (bit-and flag) (= flag))))
 
 (defn set-flag
-  [register flag-name]
-  (-> register
+  [registers flag-name]
+  (-> registers
       (update-in [:f] bit-or (get flags flag-name))))
 
 (defn unset-flags
-  [register]
-  (assoc register :f 0))
+  [registers]
+  (assoc registers :f 0))
 
 (defn set-flags
-  [register & {:as conditions}]
-  (reduce (fn [register [flag-name set?]]
-            (-> register
+  [registers & {:as conditions}]
+  (reduce (fn [registers [flag-name set?]]
+            (-> registers
                 (->/when set?
                   (set-flag flag-name))))
-          register conditions))
+          registers conditions))
