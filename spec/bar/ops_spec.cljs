@@ -4,6 +4,7 @@
   (:require [speclj.core]
             [clojure.data :as data]
             [bar.registers :as registers]
+            [bar.memory :as memory]
             [bar.bit :as bit]
             [bar.ops :as ops]
             [bar.system :as system :refer [set-registers]]))
@@ -76,3 +77,17 @@
               (should-throw js/Error
                             (-> system/zeroed
                                 (ops/execute ops/unimplemented-op)))))
+
+(describe "a load to registers instruction"
+          (let [registers (-> system/zeroed
+                              (->/in [:memory]
+                                     (memory/store 0 2)
+                                     (memory/store 1 3))
+                              (ops/execute (ops/load-to-registers :b :c))
+                              :registers)]
+            (it "should set the register values"
+                (should= 2 (registers :c))
+                (should= 3 (registers :b)))
+
+            (it "should take three cycles"
+                (should= 3 (registers :m)))))
