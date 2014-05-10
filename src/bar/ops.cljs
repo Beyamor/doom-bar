@@ -1,8 +1,7 @@
 (ns bar.ops
   (:require [bar.registers :as registers]
             [bar.system :refer [set-registers]])
-  (:require-macros [lonocloud.synthread :as ->])
-  (:refer-clojure :exclude [apply]))
+ (:require-macros [lonocloud.synthread :as ->]))
 
 (def truncate (partial bit-and 0xff))
 
@@ -26,7 +25,7 @@
                     :half-carry  (half-carried? (:a registers) (:e registers) truncated-result)
                     :zero        (zero? truncated-result))))))])
 
-(defn apply
+(defn execute
   [system [m t f]]
   (-> system
       f
