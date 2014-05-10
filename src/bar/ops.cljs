@@ -15,7 +15,7 @@
   [1 4
    (fn [register]
      (let [result (+ (:a register) (:e register))
-           truncated-result (bit-and result 0xff)]
+           truncated-result (truncate result)]
        (-> register
            (assoc :a truncated-result)
            (assoc :f 0)
