@@ -1,5 +1,5 @@
 (ns bar.ops-spec
-  (:require-macros [speclj.core :refer [describe it should= should should-not]]
+  (:require-macros [speclj.core :refer [describe it should= should should-not should-throw]]
                    [lonocloud.synthread :as ->])
   (:require [speclj.core]
             [clojure.data :as data]
@@ -70,3 +70,9 @@
                           (ops/execute (ops/addr :e))
                           :registers
                           (registers/flag-set? :zero)))))
+
+(describe "unimplemented-op"
+          (it "should throw"
+              (should-throw js/Error
+                            (-> system/zeroed
+                                (ops/execute ops/unimplemented-op)))))

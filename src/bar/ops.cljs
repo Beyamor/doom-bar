@@ -11,6 +11,11 @@
       (bit-and 0x10)
       zero? not))
 
+(def unimplemented-op
+  [0
+   (fn [_]
+     (throw (js/Error. "Unimplemented op")))])
+
 (def no-op
   [1 identity])
 
