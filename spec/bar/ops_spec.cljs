@@ -2,10 +2,20 @@
   (:require-macros [speclj.core :refer [describe it should= should should-not]]
                    [lonocloud.synthread :as ->])
   (:require [speclj.core]
+            [clojure.data :as data]
             [bar.registers :as registers]
             [bar.bit :as bit]
             [bar.ops :as ops]
             [bar.system :as system :refer [set-registers]]))
+
+(describe "no-op"
+          (it "does nothing except increment the time"
+              (let [[_ diff _] (data/diff
+                                 system/zeroed
+                                 (ops/execute system/zeroed ops/no-op))]
+                (should= diff
+                         {:registers {:m 1}}))))
+              
 
 (describe "an addr instruction"
           (it "should add registers a and e"
@@ -20,8 +30,7 @@
                                   (set-registers :e 4)
                                   (ops/execute (ops/addr :e))
                                   :registers)]
-                (should= 1 (:m registers))
-                (should= 4 (:t registers))))
+                (should= 1 (:m registers))))
 
           (let [overflown-registers (-> system/zeroed
                                         (set-registers :a 255

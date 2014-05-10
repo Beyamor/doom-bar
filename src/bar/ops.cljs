@@ -11,9 +11,12 @@
       (bit-and 0x10)
       zero? not))
 
+(def no-op
+  [1 identity])
+
 (defn addr
   [r]
-  [1 4
+  [1
    (fn [{:keys [registers] :as system}]
      (let [result (+ (registers :a) (registers r))
            truncated-result (truncate result)]
@@ -27,8 +30,7 @@
                     :zero        (zero? truncated-result))))))])
 
 (defn execute
-  [system [m t f]]
+  [system [m f]]
   (-> system
       f
-      (set-registers :m m
-                     :t t)))
+      (set-registers :m m)))
