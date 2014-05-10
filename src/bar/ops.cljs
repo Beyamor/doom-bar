@@ -19,12 +19,10 @@
        (-> register
            (assoc :a truncated-result)
            (assoc :f 0)
-           (->/when (> result 255)
-             (register/set-flag :carry))
-           (->/when (half-carried? (:a register) (:e register) truncated-result)
-             (register/set-flag :half-carry))
-           (->/when (zero? truncated-result)
-             (register/set-flag :zero)))))])
+           (register/set-flags
+             :carry       (> result 255)
+             :half-carry  (half-carried? (:a register) (:e register) truncated-result)
+             :zero        (zero? truncated-result)))))])
 
 (defn apply
   [register [m t f]]
