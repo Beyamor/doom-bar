@@ -6,3 +6,19 @@
                         :pc :sp
                         :m :t]]
           [register 0])))
+
+(def flags
+  {:carry 0x10
+   :zero 0x80
+   :operator 0x40
+   :half-carry 0x20})
+
+(defn flag-set?
+  [register flag-name]
+  (let [flag (get flags flag-name)]
+    (-> register :f (bit-and flag) (= flag))))
+
+(defn set-flag
+  [register flag-name]
+  (-> register
+      (update-in [:f] bit-or (get flags flag-name))))
