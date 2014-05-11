@@ -1,4 +1,5 @@
-(ns bar.ops.translators)
+(ns bar.ops.translators
+  (:require [clojure.core.match :refer [match]]))
 
 (defn symbol->keywords
   [symbol]
@@ -10,11 +11,12 @@
 
 (defmacro ld
   [arg1 arg2]
-  (cond
-    (list? arg1)
-    (let [[r1 r2] (symbol->keywords (first arg1))]
-      `(bar.ops/store-from-registers-address ~r1 ~r2))
+  (let [is-list? (list? arg1)]
+    (match [is-list? arg1 arg2]
+           [true _ a]
+           (let [[r1 r2] (symbol->keywords (first arg1))]
+             `(bar.ops/store-from-registers-address ~r1 ~r2))
 
-    :else
-    (let [[r1 r2] (symbol->keywords arg1)]
-      `(bar.ops/load-to-registers ~r1 ~r2))))
+           [false _ d16]
+           (let [[r1 r2] (symbol->keywords arg1)]
+             `(bar.ops/load-to-registers ~r1 ~r2)))))

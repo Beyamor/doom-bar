@@ -5,7 +5,8 @@
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [lonocloud/synthread "1.0.4"]]
+                 [lonocloud/synthread "1.0.4"]
+                 [org.clojure/core.match "0.2.1"]]
 
   :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2014"]
                                   [speclj "3.0.0"]]}}
