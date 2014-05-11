@@ -13,14 +13,15 @@
           (it "should be queriable"
               (should (-> registers/zeroed
                           (registers/set-flag :carry)
-                          (registers/flag-set? :carry)))))
+                          (registers/flag-set? :carry))))
 
-(describe "unset-flags"
-          (it "should zero out the flags"
-              (should= 0 (-> registers/zeroed
-                             (registers/set-flag :carry)
-                             (registers/unset-flags)
-                             :f))))
+          (it "should be unsettable"
+              (let [registers (-> registers/zeroed
+                                  (registers/set-flag :carry)
+                                  (registers/set-flag :zero)
+                                  (registers/unset-flag :carry))]
+              (should-not (registers/flag-set? registers :carry))
+              (should (registers/flag-set? registers :zero)))))
 
 (describe "setting a map of flags"
           (it "should set truthy values"
@@ -28,7 +29,16 @@
                                  (registers/set-flags :carry true :zero false))]
                 (should (registers/flag-set? registers :carry)) 
                 (should-not (registers/flag-set? registers :zero)) 
-                (should-not (registers/flag-set? registers :half-carry)) )))
+                (should-not (registers/flag-set? registers :half-carry))))
+
+          (it "should unset falsey values"
+              (let [registers (-> registers/zeroed
+                                  (registers/set-flag :zero)
+                                  (registers/set-flag :half-carry)
+                                  (registers/set-flags :carry true :zero false))]
+                (should (registers/flag-set? registers :carry)) 
+                (should-not (registers/flag-set? registers :zero)) 
+                (should (registers/flag-set? registers :half-carry)))))
 
 (describe "address"
           (it "should produce the address pointed at by two registers"

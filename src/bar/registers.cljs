@@ -24,16 +24,18 @@
   (-> registers
       (update-in [:f] bit-or (get flags flag-name))))
 
-(defn unset-flags
-  [registers]
-  (assoc registers :f 0))
+(defn unset-flag
+  [registers flag-name]
+  (-> registers
+      (update-in [:f] bit-and-not (get flags flag-name))))
 
 (defn set-flags
   [registers & {:as conditions}]
   (reduce (fn [registers [flag-name set?]]
             (-> registers
-                (->/when set?
-                  (set-flag flag-name))))
+                (->/if set?
+                  (set-flag flag-name)
+                  (unset-flag flag-name))))
           registers conditions))
 
 (defn address
