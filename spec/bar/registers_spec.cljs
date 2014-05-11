@@ -29,3 +29,9 @@
                 (should (registers/flag-set? registers :carry)) 
                 (should-not (registers/flag-set? registers :zero)) 
                 (should-not (registers/flag-set? registers :half-carry)) )))
+
+(describe "address"
+          (it "should produce the address pointed at by two registers"
+              (should= 0x0908 (-> registers/zeroed
+                                  (assoc :b 9 :c 8)
+                                  (registers/address :b :c)))))

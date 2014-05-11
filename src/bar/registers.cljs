@@ -35,3 +35,9 @@
                 (->/when set?
                   (set-flag flag-name))))
           registers conditions))
+
+(defn address
+  [registers h l]
+  (bit-or
+    (-> registers h (bit-shift-left 8))
+    (-> registers l)))

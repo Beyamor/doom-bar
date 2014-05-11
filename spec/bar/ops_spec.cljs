@@ -101,3 +101,24 @@
                            :memory)]
             (it "should store a value in memory"
                 (should= 23 (memory/load memory 0x0908)))))
+
+(describe "an increment registers address instruction"
+          (it "should increment the contents of that memory location"
+              (should= 2 (-> system/zeroed
+                             (set-registers :b 9
+                                            :c 8)
+                             (->/in [:memory]
+                                    (memory/store 0x0908 1))
+                             (ops/execute (ops/increment-registers-address :b :c))
+                             :memory
+                             (memory/load 0x0908))))
+
+          (it "should wrap"
+              (should= 0 (-> system/zeroed
+                             (set-registers :b 9
+                                            :c 8)
+                             (->/in [:memory]
+                                    (memory/store 0x0908 0xff))
+                             (ops/execute (ops/increment-registers-address :b :c))
+                             :memory
+                             (memory/load 0x0908)))))

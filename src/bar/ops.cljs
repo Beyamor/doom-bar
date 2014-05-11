@@ -50,13 +50,18 @@
                      r2 (->> registers :pc inc (memory/load memory)))
       (update-in [:registers :pc] + 2)))])
 
-
 (defn store-from-registers-address
   [h l]
   [2
    (fn [{:keys [registers] :as system}]
-     (let [address (bit-or
-                     (-> registers h (bit-shift-left 8))
-                     (-> registers l))
+     (let [address (registers/address registers h l)
            value (:a registers)]
      (update-in system [:memory] memory/store address value)))])
+
+(defn increment-registers-address 
+  [h l]
+  [1
+   (fn [{:keys [registers memory] :as system}]
+     (let [address (registers/address registers h l)
+           value (-> memory (memory/load address) inc (bit-and 0xff))]
+       (update-in system [:memory] memory/store address value)))])
