@@ -70,7 +70,12 @@
   [r]
   [1
    (fn [system]
-     (-> system
-         (->/in [:registers r]
-                inc
-                (bit-and 0xff))))])
+     (let [registers (:registers system)
+           value (-> registers r inc)
+           truncated-value (bit-and value 0xff)]
+       (-> system
+           (->/in [:registers]
+                  (assoc r truncated-value)
+                  (registers/set-flags
+                    :zero (zero? truncated-value)
+                    :half-carry (half-carried? (registers r) 1 truncated-value))))))])

@@ -130,8 +130,30 @@
                              (ops/execute (ops/increment-register :b))
                              :registers :b)))
 
-          (it "should wrap"
-              (should= 0 (-> system/zeroed
-                             (set-registers :b 0xff)
-                             (ops/execute (ops/increment-register :b))
-                             :registers :b))))
+          (it "should unset the operation flag"
+              (should-not (-> system/zeroed
+                              (->/in [:register]
+                                     (registers/set-flags :operation))
+                              (ops/execute (ops/increment-register :b))
+                              :registers
+                              (registers/flag-set? :operation))))
+
+          (let [overflown-registers (-> system/zeroed
+                                        (set-registers :b 0xff)
+                                        (ops/execute (ops/increment-register :b))
+                                        :registers)]
+            (it "should wrap"
+                (should= 0 (overflown-registers :b)))
+
+            (it "should set the zero flag"
+                (should (registers/flag-set? overflown-registers :zero)))
+
+            (it "should not set the carry flag"
+                (should-not (registers/flag-set? overflown-registers :carry))))
+
+          (it "should set the half-carry flag"
+              (should (-> system/zeroed
+                          (set-registers :b 0xf)
+                          (ops/execute (ops/increment-register :b))
+                          :registers
+                          (registers/flag-set? :half-carry)))))
