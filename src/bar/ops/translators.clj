@@ -7,9 +7,10 @@
        name
        .toCharArray
        (map str)
+       (map #(.toLowerCase %))
        (map keyword)))
 
-(defmacro ld
+(defmacro LD
   [arg1 arg2]
   (let [is-list? (list? arg1)]
     (match [is-list? arg1 arg2]

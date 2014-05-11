@@ -1,12 +1,10 @@
 (ns bar.gameboy
-  (:require [bar.ops :refer [nop]])
-  (:require-macros [bar.ops.translators :refer [ld]]))
+  (:require [bar.ops :refer [no-op]])
+  (:require-macros [bar.ops.translators :refer [LD]]))
 
 (def ops
   [; 0x0
-   nop
-   (ld bc, d16)
-   (ld (bc), a)])
+   no-op    (LD BC, d16)    (LD (BC), A)])
 
 (def bios
   [0x31 0xFE 0xFF 0xAF 0x21 0xFF 0x9F 0x32 0xCB 0x7C 0x20 0xFB 0x21 0x26 0xFF 0x0E

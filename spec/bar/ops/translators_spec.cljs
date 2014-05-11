@@ -1,7 +1,7 @@
 (ns bar.ops.translators-spec
   (:require-macros [speclj.core :refer [describe it should= should should-not should-throw]]
                    [lonocloud.synthread :as ->]
-                   [bar.ops.translators :refer [ld]])
+                   [bar.ops.translators :refer [LD]])
   (:require [speclj.core]
             [clojure.data :as data]
             [bar.registers :as registers]
@@ -12,7 +12,7 @@
 
 (describe "ld"
           (it "should handle the load-to-registers form"
-              (let [op (ld bc, d16)
+              (let [op (LD BC, d16)
                     registers (-> system/zeroed
                                   (->/in [:memory]
                                          (memory/store 0 2)
@@ -24,7 +24,7 @@
                 (should= 3 (registers :m))))
 
           (it "should handle the store-from-registers-address form"
-              (let [op (ld (bc), d16)
+              (let [op (LD (BC), A)
                     memory (-> system/zeroed
                                (set-registers :a 23
                                               :b 9
