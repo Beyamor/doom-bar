@@ -91,3 +91,13 @@
 
             (it "should take three cycles"
                 (should= 3 (registers :m)))))
+
+(describe "a store from registers address instruction"
+          (let [memory (-> system/zeroed
+                           (set-registers :a 23
+                                          :b 9
+                                          :c 8)
+                           (ops/execute (ops/store-from-registers-address :b :c))
+                           :memory)]
+            (it "should store a value in memory"
+                (should= 23 (memory/load memory 0x0908)))))
