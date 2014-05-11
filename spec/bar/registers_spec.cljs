@@ -34,11 +34,11 @@
           (it "should unset falsey values"
               (let [registers (-> registers/zeroed
                                   (registers/set-flag :zero)
-                                  (registers/set-flag :half-carry)
+                                  (registers/set-flag :operation)
                                   (registers/set-flags :carry true :zero false))]
                 (should (registers/flag-set? registers :carry)) 
                 (should-not (registers/flag-set? registers :zero)) 
-                (should (registers/flag-set? registers :half-carry)))))
+                (should (registers/flag-set? registers :operation)))))
 
 (describe "address"
           (it "should produce the address pointed at by two registers"

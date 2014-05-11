@@ -11,7 +11,7 @@
 (def flags
   {:carry 0x10
    :zero 0x80
-   :operator 0x40
+   :operation 0x40
    :half-carry 0x20})
 
 (defn flag-set?

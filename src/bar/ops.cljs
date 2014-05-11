@@ -78,4 +78,5 @@
                   (assoc r truncated-value)
                   (registers/set-flags
                     :zero (zero? truncated-value)
-                    :half-carry (half-carried? (registers r) 1 truncated-value))))))])
+                    :half-carry (half-carried? (registers r) 1 truncated-value)
+                    :operation false)))))])

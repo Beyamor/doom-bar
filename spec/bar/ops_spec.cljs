@@ -132,8 +132,8 @@
 
           (it "should unset the operation flag"
               (should-not (-> system/zeroed
-                              (->/in [:register]
-                                     (registers/set-flags :operation))
+                              (->/in [:registers]
+                                     (registers/set-flag :operation))
                               (ops/execute (ops/increment-register :b))
                               :registers
                               (registers/flag-set? :operation))))
