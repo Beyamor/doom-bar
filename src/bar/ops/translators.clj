@@ -21,3 +21,8 @@
            [false _ d16]
            (let [[r1 r2] (symbol->keywords arg1)]
              `(bar.ops/load-to-registers ~r1 ~r2)))))
+
+(defmacro INC
+  [arg1]
+  (let [[r1 r2] (symbol->keywords arg1)]
+    `(bar.ops/increment-registers-address ~r1 ~r2)))
