@@ -122,3 +122,16 @@
                              (ops/execute (ops/increment-registers-address :b :c))
                              :memory
                              (memory/load 0x0908)))))
+
+(describe "an increment register instruction"
+          (it "should increment the contents of that register"
+              (should= 2 (-> system/zeroed
+                             (set-registers :b 1)
+                             (ops/execute (ops/increment-register :b))
+                             :registers :b)))
+
+          (it "should wrap"
+              (should= 0 (-> system/zeroed
+                             (set-registers :b 0xff)
+                             (ops/execute (ops/increment-register :b))
+                             :registers :b))))

@@ -65,3 +65,12 @@
      (let [address (registers/address registers h l)
            value (-> memory (memory/load address) inc (bit-and 0xff))]
        (update-in system [:memory] memory/store address value)))])
+
+(defn increment-register
+  [r]
+  [1
+   (fn [system]
+     (-> system
+         (->/in [:registers r]
+                inc
+                (bit-and 0xff))))])
