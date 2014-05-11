@@ -24,5 +24,12 @@
 
 (defmacro INC
   [arg1]
-  (let [[r1 r2] (symbol->keywords arg1)]
-    `(bar.ops/increment-registers-address ~r1 ~r2)))
+  (let [registers (symbol->keywords arg1)]
+    (match (count registers)
+           2
+           (let [[r1 r2] registers]
+             `(bar.ops/increment-registers-address ~r1 ~r2))
+
+           1
+           (let [[r] registers]
+             `(bar.ops/increment-register ~r)))))

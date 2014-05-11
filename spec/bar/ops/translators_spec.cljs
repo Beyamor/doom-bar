@@ -50,6 +50,17 @@
                                               :c 8)
                                (->/in [:memory]
                                       (memory/store 0x0908 0xff))
-                               (ops/execute (ops/increment-registers-address :b :c))
+                               (ops/execute op)
                                :memory
-                               (memory/load 0x0908))))))
+                               (memory/load 0x0908)))))
+
+          (it "should handle the increment-register form"
+              (let [op (INC B)]
+                (should= 2 (-> system/zeroed
+                               (set-registers :b 1)
+                               (ops/execute op)
+                               :registers :b))
+                (should= 0 (-> system/zeroed
+                               (set-registers :b 0xff)
+                               (ops/execute op)
+                               :registers :b)))))
