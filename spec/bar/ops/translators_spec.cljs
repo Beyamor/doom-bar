@@ -21,4 +21,14 @@
                                   :registers)]
                 (should= 2 (registers :c))
                 (should= 3 (registers :b))
-                (should= 3 (registers :m)))))
+                (should= 3 (registers :m))))
+
+          (it "should handle the store-from-registers-address form"
+              (let [op (ld (bc), d16)
+                    memory (-> system/zeroed
+                               (set-registers :a 23
+                                              :b 9
+                                              :c 8)
+                               (ops/execute (ops/store-from-registers-address :b :c))
+                               :memory)]
+                (should= 23 (memory/load memory 0x0908)))))
