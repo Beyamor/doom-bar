@@ -1,7 +1,7 @@
 (ns bar.ops.translators-spec
   (:require-macros [speclj.core :refer [describe it should= should should-not should-throw]]
                    [lonocloud.synthread :as ->]
-                   [bar.ops.translators :refer [LD INC]])
+                   [bar.ops.translators :refer [LD INC DEC]])
   (:require [speclj.core]
             [clojure.data :as data]
             [bar.registers :as registers]
@@ -64,3 +64,15 @@
                                (set-registers :b 0xff)
                                (ops/execute op)
                                :registers :b)))))
+
+(describe "DEC"
+          (it "should handle the decrement-register form"
+              (let [op (DEC B)]
+                (should= 1 (-> system/zeroed
+                               (set-registers :b 2)
+                               (ops/execute op)
+                               :registers :b))
+                (should= 0xff (-> system/zeroed
+                                  (set-registers :b 0)
+                                  (ops/execute op)
+                                  :registers :b)))))

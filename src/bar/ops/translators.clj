@@ -33,3 +33,8 @@
            1
            (let [[r] registers]
              `(bar.ops/increment-register ~r)))))
+
+(defmacro DEC
+  [r]
+  (let [[r] (symbol->keywords r)]
+    `(bar.ops/decrement-register ~r)))
