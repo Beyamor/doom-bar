@@ -157,3 +157,36 @@
                           (ops/execute (ops/increment-register :b))
                           :registers
                           (registers/flag-set? :half-carry)))))
+
+(describe "an decrement register instruction"
+          (it "should decrement the contents of that register"
+              (should= 1 (-> system/zeroed
+                             (set-registers :b 2)
+                             (ops/execute (ops/decrement-register :b))
+                             :registers :b)))
+
+          (it "should set the operation flag"
+              (should (-> system/zeroed
+                          (ops/execute (ops/decrement-register :b))
+                          :registers
+                          (registers/flag-set? :operation))))
+
+          (let [underflown-registers (-> system/zeroed
+                                         (set-registers :b 0)
+                                         (ops/execute (ops/decrement-register :b))
+                                         :registers)]
+            (it "should wrap"
+                (should= 0xff (underflown-registers :b)))
+
+            (it "should set the zero flag"
+                (should (registers/flag-set? underflown-registers :zero)))
+
+            (it "should not set the carry flag"
+                (should-not (registers/flag-set? underflown-registers :carry))))
+
+          (it "should set the half-carry flag"
+              (should (-> system/zeroed
+                          (set-registers :b 0x10)
+                          (ops/execute (ops/decrement-register :b))
+                          :registers
+                          (registers/flag-set? :half-carry)))))

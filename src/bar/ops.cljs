@@ -80,3 +80,18 @@
                     :zero (zero? truncated-value)
                     :half-carry (half-carried? (registers r) 1 truncated-value)
                     :operation false)))))])
+
+(defn decrement-register
+  [r]
+  [1
+   (fn [system]
+     (let [registers (:registers system)
+           value (-> registers r dec)
+           truncated-value (bit-and value 0xff)]
+       (-> system
+           (->/in [:registers]
+                  (assoc r truncated-value)
+                  (registers/set-flags
+                    :zero (zero? truncated-value)
+                    :half-carry (half-carried? (registers r) 1 truncated-value)
+                    :operation true)))))])
