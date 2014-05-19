@@ -190,3 +190,15 @@
                           (ops/execute (ops/decrement-register :b))
                           :registers
                           (registers/flag-set? :half-carry)))))
+
+(describe "a load immediate value to register instruction"
+          (let [registers (-> system/zeroed
+                              (->/in [:memory]
+                                     (memory/store 0xfffe 2))
+                              (set-registers :sp 0xfffe)
+                              (ops/execute (ops/load-immediate-value :b))
+                              :registers)]
+            (it "should store the next value in the register"
+                (should= 2 (registers :b)))
+            (it "should pop from the stack"
+                (should= 0xffff (registers :sp)))))
