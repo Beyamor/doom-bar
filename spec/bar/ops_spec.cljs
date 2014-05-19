@@ -202,3 +202,22 @@
                 (should= 2 (registers :b)))
             (it "should pop from the stack"
                 (should= 0xffff (registers :sp)))))
+
+(describe "the rlca instruction"
+          (let [registers (-> system/zeroed
+                              (set-registers :a 0x85)
+                              (->/in [:registers]
+                                     (registers/set-flags
+                                       :carry       false
+                                       :half-carry  true
+                                       :zero        true
+                                       :operation   true))
+                              (ops/execute ops/rlca))]
+            (it "should rotate the bits in A"
+                (should= 0x0a (registers :a)))
+            (it "should set the carry flag"
+                (should (registers/flag-set? registers :carry)))
+            (it "should unset the other flags"
+                (should-not (registers/flag-set? registers :half-carry))
+                (should-not (registers/flag-set? registers :zero))
+                (should-not (registers/flag-set? registers :operation)))))

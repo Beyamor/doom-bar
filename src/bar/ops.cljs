@@ -63,7 +63,7 @@
   [1
    (fn [{:keys [registers memory] :as system}]
      (let [address (registers/address registers h l)
-           value (-> memory (memory/load address) inc (bit-and 0xff))]
+           value (-> memory (memory/load address) inc truncate)]
        (update-in system [:memory] memory/store address value)))])
 
 (defn increment-register
@@ -72,7 +72,7 @@
    (fn [system]
      (let [registers (:registers system)
            value (-> registers r inc)
-           truncated-value (bit-and value 0xff)]
+           truncated-value (truncate value)]
        (-> system
            (->/in [:registers]
                   (assoc r truncated-value)
@@ -87,7 +87,7 @@
    (fn [system]
      (let [registers        (:registers system)
            value            (-> registers r dec)
-           truncated-value  (bit-and value 0xff)]
+           truncated-value  (truncate value)]
        (-> system
            (->/in [:registers]
                   (assoc r truncated-value)
@@ -106,3 +106,18 @@
            (->/in [:registers]
              (assoc register value)
              (update-in [:sp] inc)))))])
+
+(def rlca
+  [1
+   (fn [system]
+     (let [shifted-a  (-> system :registers :a (bit-shift-left 1))
+           high?      (bit-test shifted-a 9)
+           cycled-a   (-> shifted-a truncate (->/when high? (bit-or 1)))]
+       (-> system
+           (->/in [:registers]
+                  (assoc :a cycled-a)
+                  (registers/set-flags
+                    :carry      high?
+                    :zero       false
+                    :half-carry false
+                    :operation  false)))))])
