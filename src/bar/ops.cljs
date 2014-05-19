@@ -99,13 +99,13 @@
 (defn load-immediate-value 
   [register]
   [2
-   (fn [system]
-     (let [address  (-> system :registers :sp)
-           value    (-> system :memory (memory/load address))]
+   (fn [{:keys [memory registers] :as system}]
+     (let [value  (memory/load memory
+                               (registers :pc))]
        (-> system
            (->/in [:registers]
-             (assoc register value)
-             (update-in [:sp] inc)))))])
+                  (assoc register value)
+                  (update-in [:pc] inc)))))])
 
 (def rlca
   [1
