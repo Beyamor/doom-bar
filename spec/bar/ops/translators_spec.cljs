@@ -31,7 +31,18 @@
                                               :c 8)
                                (ops/execute op)
                                :memory)]
-                (should= 23 (memory/load memory 0x0908)))))
+                (should= 23 (memory/load memory 0x0908))))
+
+          (it "should handle the load-immediate-value form"
+              (let [op (LD B, d8)
+                    registers (-> system/zeroed
+                                  (->/in [:memory]
+                                         (memory/store 0xfffe 2))
+                                  (set-registers :sp 0xfffe)
+                                  (ops/execute (ops/load-immediate-value :b))
+                                  :registers)]
+                (should= 2 (registers :b))
+                (should= 0xffff (registers :sp)))))
 
 (describe "INC"
           (it "should handle the increment-registers-address form"

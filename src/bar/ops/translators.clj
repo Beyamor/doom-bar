@@ -20,8 +20,11 @@
 
            [false _ 'd16]
            (let [[r1 r2] (symbol->keywords arg1)]
-             `(bar.ops/load-to-registers ~r1 ~r2)))))
+             `(bar.ops/load-to-registers ~r1 ~r2))
 
+           [false _ 'd8]
+           (let [[r] (symbol->keywords arg1)]
+             `(bar.ops/load-immediate-value ~r)))))
 (defmacro INC
   [arg1]
   (let [registers (symbol->keywords arg1)]
