@@ -190,16 +190,15 @@
                           (registers/flag-set? :half-carry)))))
 
 (describe "a load immediate value to register instruction"
+          (with registers (-> system/zeroed
+                             (->/in [:memory]
+                                    (memory/store 0 2))
+                             (ops/execute (ops/load-immediate-value :b))
+                             :registers))
           (it "should store the next value in the register"
-              (let [registers (-> system/zeroed
-                                  (->/in [:memory]
-                                         (memory/store 0 2))
-                                  (ops/execute (ops/load-immediate-value :b))
-                                  :registers)]
-                (should= 2 (registers :b))))
-          )
-;(it "should increment the program counter"
-;    (should= 0x001 (registers :pc)))))
+              (should= 2 (@registers :b)))
+          (it "should increment the program counter"
+              (should= 0x001 (@registers :pc))))
 
 (describe "the rlca instruction"
           (with registers (-> system/zeroed
