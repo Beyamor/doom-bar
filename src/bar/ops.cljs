@@ -111,7 +111,7 @@
   [1
    (fn [system]
      (let [shifted-a  (-> system :registers :a (bit-shift-left 1))
-           high?      (bit-test shifted-a 9)
+           high?      (bit-test shifted-a 8)
            cycled-a   (-> shifted-a truncate (->/when high? (bit-or 1)))]
        (-> system
            (->/in [:registers]
