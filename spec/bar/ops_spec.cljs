@@ -224,3 +224,15 @@
               (should-not (registers/flag-set? @registers :half-carry))
               (should-not (registers/flag-set? @registers :zero))
               (should-not (registers/flag-set? @registers :operation))))
+
+(describe "the store-stack-pointer instruction"
+          (with memory (-> system/zeroed
+                           (assoc-in [:registers :sp] 0xfff8)
+                           (->/in [:memory]
+                                  (memory/store 0 0x00)
+                                  (memory/store 1 0xc1))
+                           (ops/execute ops/store-stack-pointer)
+                           :memory))
+          (it "should store the stack pointer values"
+              (should= 0xf8 (memory/load @memory 0xc100))
+              (should= 0xff (memory/load @memory 0xc101))))

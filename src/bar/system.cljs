@@ -53,6 +53,12 @@
         (update-in [:registers :pc] inc)
         (-> memory (memory/load pc) return)))
 
+(def read-next-word
+  (m/do low <- read-next-byte
+        high <- read-next-byte
+        (return (bit-or (bit-shift-left high 8)
+                        low))))
+
 (defn set-register
   [r value]
   (update-in [:registers] assoc r value))

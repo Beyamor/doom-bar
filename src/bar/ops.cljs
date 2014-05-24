@@ -3,7 +3,7 @@
             [bar.memory :as memory]
             [bar.system :refer [read-next-byte set-registers store-in-memory read-register
                                 update-register set-flags read-registers read-register-address
-                                read-memory return set-register]]
+                                read-memory return set-register read-next-word]]
             [bar.util :refer [truncate-byte]])
  (:require-macros [lonocloud.synthread :as ->]
                   [bar.system.macros :as m]))
@@ -87,3 +87,10 @@
                     :zero       false
                     :half-carry false
                     :operation  false))])
+
+(def store-stack-pointer
+  [3
+   (m/do sp <- (read-register :sp)
+         address <- read-next-word
+         (store-in-memory address (-> sp truncate-byte))
+         (store-in-memory (inc address) (-> sp (bit-shift-right 8) truncate-byte)))])
