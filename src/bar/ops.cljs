@@ -79,12 +79,11 @@
 
 (def rlca
   [1
-   (let [cycle (fn [a]
-                 (let [shifted-a  (bit-shift-left a 1)
-                       high?      (bit-test shifted-a 8)]
-                   (-> shifted-a (->/when high? (bit-or 1)))))]
-     (m/do {:keys [carried?]} <- (update-register :a cycle)
-           (set-flags :carry      :carried?
-                      :zero       false
-                      :half-carry false
-                      :operation  false)))])
+   (m/do {:keys [carried?]} <- (update-register :a
+                                                #(let [shifted-a (bit-shift-left % 1)
+                                                       high?     (bit-test shifted-a 8)]
+                                                   (-> shifted-a (->/when high? (bit-or 1)))))
+         (set-flags :carry      :carried?
+                    :zero       false
+                    :half-carry false
+                    :operation  false))])
