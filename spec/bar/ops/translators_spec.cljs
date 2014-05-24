@@ -1,5 +1,5 @@
 (ns bar.ops.translators-spec
-  (:require-macros [speclj.core :refer [describe it should= should should-not should-throw]]
+  (:require-macros [speclj.core :refer [describe it should= should should-not should-throw with]]
                    [lonocloud.synthread :as ->]
                    [bar.ops.translators :refer [LD INC DEC]])
   (:require [speclj.core]
@@ -40,7 +40,19 @@
                                   (ops/execute (ops/load-immediate-value :b))
                                   :registers)]
                 (should= 2 (registers :b))
-                (should= 0x001 (registers :pc)))))
+                (should= 0x001 (registers :pc))))
+          
+          (with memory (-> system/zeroed
+                           (assoc-in [:registers :sp] 0xfff8)
+                           (->/in [:memory]
+                                  (memory/store 0 0x00)
+                                  (memory/store 1 0xc1))
+                           (ops/execute (LD (d16), SP))
+                           :memory))
+          (it "should handle the store-stack-pointer form"
+              (should= 0xf8 (memory/load @memory 0xc100))
+              (should= 0xff (memory/load @memory 0xc101))))
+
 
 (describe "INC"
           (it "should handle the increment-registers-address form"
