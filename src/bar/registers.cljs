@@ -1,4 +1,5 @@
 (ns bar.registers
+  (:require [bar.util :refer [truncate-byte half-carried?]])
   (:require-macros [lonocloud.synthread :as ->]))
 
 (def zeroed
@@ -43,3 +44,13 @@
   (bit-or
     (-> registers h (bit-shift-left 8))
     (-> registers l)))
+
+(defn update-register
+  [registers r f & args]
+  (let [value           (get registers r)
+        updated-value   (apply f value args)
+        truncated-value (truncate-byte updated-value)]
+    {:value         truncated-value
+     :zero?         (zero? truncated-value)
+     :carried?      (> updated-value 0xff)
+     :half-carried? #(half-carried? value % truncated-value)}))

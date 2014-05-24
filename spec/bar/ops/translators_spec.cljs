@@ -6,9 +6,9 @@
             [clojure.data :as data]
             [bar.registers :as registers]
             [bar.memory :as memory]
-            [bar.bit :as bit]
             [bar.ops :as ops]
             [bar.system :as system]))
+
 (describe "LD"
           (it "should handle the load-to-registers form"
               (let [op (LD BC, d16)

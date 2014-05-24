@@ -5,7 +5,6 @@
             [clojure.data :as data]
             [bar.registers :as registers]
             [bar.memory :as memory]
-            [bar.bit :as bit]
             [bar.ops :as ops]
             [bar.system :as system]))
 
@@ -16,7 +15,6 @@
           (it "does nothing except increment the time"
               (should= @diff
                        {:registers {:m 1}})))
-
 
 (describe "an addr instruction"
           (it "should add registers a and e"

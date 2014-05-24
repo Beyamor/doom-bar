@@ -1,22 +1,19 @@
 (ns bar.ops
   (:require [bar.registers :as registers]
             [bar.memory :as memory]
-            [bar.system])
- (:require-macros [lonocloud.synthread :as ->]))
+            [bar.system :refer [read-next-byte set-registers store-in-memory read-register
+                                update-register set-flags read-registers read-register-address
+                                read-memory return set-register]]
+            [bar.util :refer [truncate-byte]])
+ (:require-macros [lonocloud.synthread :as ->]
+                  [bar.system.macros :as m]))
 
 (defn execute
   [system [m f]]
   (-> system
       f
+      second
       (assoc-in [:registers :m] m)))
-
-(def truncate (partial bit-and 0xff))
-
-(defn half-carried?
-  [addend1 addend2 result]
-  (-> (bit-xor addend1 addend2 result)
-      (bit-and 0x10)
-      zero? not))
 
 (def unimplemented-op
   [0
@@ -24,101 +21,70 @@
      (throw (js/Error. "Unimplemented op")))])
 
 (def no-op
-  [1 identity])
+  [1 (return nil)])
 
 (defn addr
   [r]
   [1
-   (fn [{:keys [registers] :as system}]
-     (let [result (+ (registers :a) (registers r))
-           truncated-result (truncate result)]
-       (-> system
-           (->/in [:registers]
-                  (assoc :a truncated-result
-                         :f 0)
-                  (registers/set-flags
-                    :carry       (> result 255)
-                    :half-carry  (half-carried? (registers :a) (registers r) truncated-result)
-                    :zero        (zero? truncated-result))))))])
+   (m/do value <- (read-register r)
+         {:keys [half-carried? zero? carried?]} <- (update-register :a + value)
+         (set-flags :carry      carried?
+                    :half-carry (half-carried? value)
+                    :zero       zero?))])
 
 (defn load-to-registers
-  [r2 r1]
- [3
- (fn [{:keys [registers memory] :as system}]
-   (-> system
-       (->/in [:registers]
-              (assoc r1 (->> registers :pc (memory/load memory))
-                     r2 (->> registers :pc inc (memory/load memory)))
-              (update-in [:pc] + 2))))])
+  [r1 r2]
+  [3
+   (m/do byte2 <- read-next-byte
+         byte1 <- read-next-byte
+         (set-registers r1 byte1
+                        r2 byte2))])
 
 (defn store-from-registers-address
   [h l]
   [2
-   (fn [{:keys [registers] :as system}]
-     (let [address (registers/address registers h l)
-           value (:a registers)]
-     (update-in system [:memory] memory/store address value)))])
+   (m/do {:keys [a] :as registers} <- read-registers
+         :let [address (registers/address registers h l)]
+         (store-in-memory address a))])
 
 (defn increment-registers-address 
   [h l]
   [1
-   (fn [{:keys [registers memory] :as system}]
-     (let [address (registers/address registers h l)
-           value (-> memory (memory/load address) inc truncate)]
-       (update-in system [:memory] memory/store address value)))])
+   (m/do address  <- (read-register-address h l)
+         memory   <- read-memory
+         :let [value (-> memory (memory/load address) inc truncate-byte)]
+         (store-in-memory address value))]) 
 
 (defn increment-register
   [r]
   [1
-   (fn [system]
-     (let [registers (:registers system)
-           value (-> registers r inc)
-           truncated-value (truncate value)]
-       (-> system
-           (->/in [:registers]
-                  (assoc r truncated-value)
-                  (registers/set-flags
-                    :zero (zero? truncated-value)
-                    :half-carry (half-carried? (registers r) 1 truncated-value)
-                    :operation false)))))])
+   (m/do {:keys [zero? half-carried?]} <- (update-register r inc)
+         (set-flags :zero       zero?
+                    :half-carry (half-carried? 1)
+                    :operation  false))])
 
 (defn decrement-register
   [r]
   [1
-   (fn [system]
-     (let [registers        (:registers system)
-           value            (-> registers r dec)
-           truncated-value  (truncate value)]
-       (-> system
-           (->/in [:registers]
-                  (assoc r truncated-value)
-                  (registers/set-flags
-                    :zero (zero? truncated-value)
-                    :half-carry (half-carried? (registers r) 1 truncated-value)
-                    :operation true)))))])
+   (m/do {:keys [zero? half-carried?]} <- (update-register r dec)
+         (set-flags :zero       zero?
+                    :half-carry (half-carried? 1)
+                    :operation  true))])
 
 (defn load-immediate-value 
-  [register]
+  [r]
   [2
-   (fn [{:keys [memory registers] :as system}]
-     (let [value  (memory/load memory
-                               (registers :pc))]
-       (-> system
-           (->/in [:registers]
-                  (assoc register value)
-                  (update-in [:pc] inc)))))])
+   (m/do value <- read-next-byte
+         (set-registers r value))])
 
 (def rlca
   [1
-   (fn [system]
-     (let [shifted-a  (-> system :registers :a (bit-shift-left 1))
-           high?      (bit-test shifted-a 8)
-           cycled-a   (-> shifted-a truncate (->/when high? (bit-or 1)))]
-       (-> system
-           (->/in [:registers]
-                  (assoc :a cycled-a)
-                  (registers/set-flags
-                    :carry      high?
-                    :zero       false
-                    :half-carry false
-                    :operation  false)))))])
+   (let [cycle (fn [a]
+                 (let [shifted-a  (bit-shift-left a 1)
+                       high?      (bit-test shifted-a 8)]
+                   (-> shifted-a (->/when high? (bit-or 1)))))]
+     (m/do {:keys [carried?]} <- (update-register :a cycle)
+           (set-flags :carry      :carried?
+                      :zero       false
+                      :half-carry false
+                      :operation  false)))])

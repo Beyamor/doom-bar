@@ -13,15 +13,14 @@
   :plugins [[speclj "3.0.0"]
             [lein-cljsbuild "1.0.2"]]
 
-  :cljsbuild {:builds        {:dev  {:source-paths   ["src" "spec"]
-                                     :compiler       {:output-to     "js/bar_dev.js"
-                                                      :optimizations :whitespace
-                                                      :pretty-print  true}
-                                     :notify-command ["phantomjs"  "bin/speclj" "js/bar_dev.js"]}
+  :cljsbuild {:builds {:dev  {:source-paths   ["src" "spec"]
+                              :compiler       {:output-to     "js/bar_dev.js"
+                                               :optimizations :whitespace}
+                              :notify-command ["phantomjs"  "bin/speclj" "js/bar_dev.js"]}
 
-                              :prod {:source-paths ["src"]
-                                     :compiler     {:output-to     "js/bar.js"
-                                                    :optimizations :simple}}}
+                       :prod {:source-paths ["src"]
+                              :compiler     {:output-to     "js/bar.js"
+                                             :optimizations :simple}}}
               :test-commands {"test" ["phantomjs" "bin/speclj" "js/bar_dev.js"]}}
 
   :source-paths ["src"]
