@@ -1,14 +1,14 @@
 (ns bar.ops
   (:require [bar.registers :as registers]
             [bar.memory :as memory]
-            [bar.system :refer [set-registers]])
+            [bar.system])
  (:require-macros [lonocloud.synthread :as ->]))
 
 (defn execute
   [system [m f]]
   (-> system
       f
-      (set-registers :m m)))
+      (assoc-in [:registers :m] m)))
 
 (def truncate (partial bit-and 0xff))
 
@@ -33,9 +33,9 @@
      (let [result (+ (registers :a) (registers r))
            truncated-result (truncate result)]
        (-> system
-           (set-registers :a truncated-result
-                          :f 0)
            (->/in [:registers]
+                  (assoc :a truncated-result
+                         :f 0)
                   (registers/set-flags
                     :carry       (> result 255)
                     :half-carry  (half-carried? (registers :a) (registers r) truncated-result)
@@ -45,10 +45,11 @@
   [r2 r1]
  [3
  (fn [{:keys [registers memory] :as system}]
-  (-> system
-      (set-registers r1 (->> registers :pc (memory/load memory))
+   (-> system
+       (->/in [:registers]
+              (assoc r1 (->> registers :pc (memory/load memory))
                      r2 (->> registers :pc inc (memory/load memory)))
-      (update-in [:registers :pc] + 2)))])
+              (update-in [:pc] + 2))))])
 
 (defn store-from-registers-address
   [h l]

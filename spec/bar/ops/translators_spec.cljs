@@ -8,8 +8,7 @@
             [bar.memory :as memory]
             [bar.bit :as bit]
             [bar.ops :as ops]
-            [bar.system :as system :refer [set-registers]]))
-
+            [bar.system :as system]))
 (describe "LD"
           (it "should handle the load-to-registers form"
               (let [op (LD BC, d16)
@@ -26,9 +25,10 @@
           (it "should handle the store-from-registers-address form"
               (let [op (LD (BC), A)
                     memory (-> system/zeroed
-                               (set-registers :a 23
-                                              :b 9
-                                              :c 8)
+                               (->/in [:registers]
+                                      (assoc :a 23
+                                             :b 9
+                                             :c 8))
                                (ops/execute op)
                                :memory)]
                 (should= 23 (memory/load memory 0x0908))))
@@ -46,8 +46,9 @@
           (it "should handle the increment-registers-address form"
               (let [op (INC BC)]
                 (should= 2 (-> system/zeroed
-                               (set-registers :b 9
-                                              :c 8)
+                               (->/in [:registers]
+                                      (assoc :b 9
+                                             :c 8))
                                (->/in [:memory]
                                       (memory/store 0x0908 1))
                                (ops/execute op)
@@ -55,8 +56,9 @@
                                (memory/load 0x0908)))
 
                 (should= 0 (-> system/zeroed
-                               (set-registers :b 9
-                                              :c 8)
+                               (->/in [:registers]
+                                      (assoc :b 9
+                                             :c 8))
                                (->/in [:memory]
                                       (memory/store 0x0908 0xff))
                                (ops/execute op)
@@ -66,11 +68,13 @@
           (it "should handle the increment-register form"
               (let [op (INC B)]
                 (should= 2 (-> system/zeroed
-                               (set-registers :b 1)
+                               (->/in [:registers]
+                                      (assoc :b 1))
                                (ops/execute op)
                                :registers :b))
                 (should= 0 (-> system/zeroed
-                               (set-registers :b 0xff)
+                               (->/in [:registers]
+                                      (assoc :b 0xff))
                                (ops/execute op)
                                :registers :b)))))
 
@@ -78,10 +82,12 @@
           (it "should handle the decrement-register form"
               (let [op (DEC B)]
                 (should= 1 (-> system/zeroed
-                               (set-registers :b 2)
+                               (->/in [:registers]
+                                      (assoc :b 2))
                                (ops/execute op)
                                :registers :b))
                 (should= 0xff (-> system/zeroed
-                                  (set-registers :b 0)
+                                  (->/in [:registers]
+                                         (assoc :b 0))
                                   (ops/execute op)
                                   :registers :b)))))

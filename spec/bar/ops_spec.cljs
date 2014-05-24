@@ -7,7 +7,7 @@
             [bar.memory :as memory]
             [bar.bit :as bit]
             [bar.ops :as ops]
-            [bar.system :as system :refer [set-registers]]))
+            [bar.system :as system]))
 
 (describe "no-op"
           (with diff (second (data/diff
@@ -22,19 +22,20 @@
           (it "should add registers a and e"
               (should= 4
                        (-> system/zeroed
-                           (set-registers :e 4)
+                           (assoc-in [:registers :e] 4)
                            (ops/execute (ops/addr :e))
                            :registers :a)))
 
           (it "should set the time taken"
               (should= 1 (-> system/zeroed
-                             (set-registers :e 4)
+                             (assoc-in [:registers :e] 4)
                              (ops/execute (ops/addr :e))
                              :registers :m)))
 
           (with overflown-registers (-> system/zeroed
-                                        (set-registers :a 255
-                                                       :e 5)
+                                        (->/in [:registers]
+                                               (assoc :a 255
+                                                      :e 5))
                                         (ops/execute (ops/addr :e))
                                         :registers))
           (it "should truncate to 8 bits"
@@ -44,15 +45,17 @@
 
           (it "should set the half-carry bit"
               (should (-> system/zeroed
-                          (set-registers :a 0x8
-                                         :e 0x8)
+                          (->/in [:registers]
+                                 (assoc :a 0x8
+                                        :e 0x8))
                           (ops/execute (ops/addr :e))
                           :registers
                           (registers/flag-set? :half-carry)))
 
               (should-not (-> system/zeroed
-                              (set-registers :a 0x7
-                                             :e 0x8)
+                              (->/in [:registers]
+                                     (assoc :a 0x7
+                                            :e 0x8))
                               (ops/execute (ops/addr :e))
                               :registers
                               (registers/flag-set? :half-carry))))
@@ -64,8 +67,9 @@
                           (registers/flag-set? :zero)))
 
               (should (-> registers/zeroed
-                          (set-registers :a 0x1
-                                         :e 0xff)
+                          (->/in [:registers]
+                                 (assoc :a 0x1
+                                        :e 0xff))
                           (ops/execute (ops/addr :e))
                           :registers
                           (registers/flag-set? :zero)))))
@@ -92,9 +96,10 @@
 (describe "a store from registers address instruction"
           (it "should store a value in memory"
               (should= 23 (-> system/zeroed
-                              (set-registers :a 23
-                                             :b 9
-                                             :c 8)
+                              (->/in [:registers]
+                                     (assoc :a 23
+                                            :b 9
+                                            :c 8))
                               (ops/execute (ops/store-from-registers-address :b :c))
                               :memory
                               (memory/load 0x0908)))))
@@ -102,8 +107,9 @@
 (describe "an increment registers address instruction"
           (it "should increment the contents of that memory location"
               (should= 2 (-> system/zeroed
-                             (set-registers :b 9
-                                            :c 8)
+                             (->/in [:registers]
+                                    (assoc :b 9
+                                           :c 8))
                              (->/in [:memory]
                                     (memory/store 0x0908 1))
                              (ops/execute (ops/increment-registers-address :b :c))
@@ -112,8 +118,9 @@
 
           (it "should wrap"
               (should= 0 (-> system/zeroed
-                             (set-registers :b 9
-                                            :c 8)
+                             (->/in [:registers]
+                                    (assoc :b 9
+                                           :c 8))
                              (->/in [:memory]
                                     (memory/store 0x0908 0xff))
                              (ops/execute (ops/increment-registers-address :b :c))
@@ -123,7 +130,7 @@
 (describe "an increment register instruction"
           (it "should increment the contents of that register"
               (should= 2 (-> system/zeroed
-                             (set-registers :b 1)
+                             (assoc-in [:registers :b] 1)
                              (ops/execute (ops/increment-register :b))
                              :registers :b)))
 
@@ -136,7 +143,7 @@
                               (registers/flag-set? :operation))))
 
           (with overflown-registers (-> system/zeroed
-                                        (set-registers :b 0xff)
+                                        (assoc-in [:registers :b] 0xff)
                                         (ops/execute (ops/increment-register :b))
                                         :registers))
           (it "should wrap"
@@ -148,7 +155,7 @@
 
           (it "should set the half-carry flag"
               (should (-> system/zeroed
-                          (set-registers :b 0xf)
+                          (assoc-in [:registers :b] 0xf)
                           (ops/execute (ops/increment-register :b))
                           :registers
                           (registers/flag-set? :half-carry)))))
@@ -156,7 +163,7 @@
 (describe "an decrement register instruction"
           (it "should decrement the contents of that register"
               (should= 1 (-> system/zeroed
-                             (set-registers :b 2)
+                             (assoc-in [:registers :b] 2)
                              (ops/execute (ops/decrement-register :b))
                              :registers :b)))
 
@@ -167,7 +174,7 @@
                           (registers/flag-set? :operation))))
 
           (with underflown-registers (-> system/zeroed
-                                         (set-registers :b 0)
+                                         (assoc-in [:registers :b] 0)
                                          (ops/execute (ops/decrement-register :b))
                                          :registers))
           (it "should wrap"
@@ -177,24 +184,24 @@
 
           (it "should set the zero flag"
               (should (-> system/zeroed
-                          (set-registers :b 1)
+                          (assoc-in [:registers :b] 1)
                           (ops/execute (ops/decrement-register :b))
                           :registers
                           (registers/flag-set? :zero))))
 
           (it "should set the half-carry flag"
               (should (-> system/zeroed
-                          (set-registers :b 0x10)
+                          (assoc-in [:registers :b] 0x10)
                           (ops/execute (ops/decrement-register :b))
                           :registers
                           (registers/flag-set? :half-carry)))))
 
 (describe "a load immediate value to register instruction"
           (with registers (-> system/zeroed
-                             (->/in [:memory]
-                                    (memory/store 0 2))
-                             (ops/execute (ops/load-immediate-value :b))
-                             :registers))
+                              (->/in [:memory]
+                                     (memory/store 0 2))
+                              (ops/execute (ops/load-immediate-value :b))
+                              :registers))
           (it "should store the next value in the register"
               (should= 2 (@registers :b)))
           (it "should increment the program counter"
@@ -202,8 +209,8 @@
 
 (describe "the rlca instruction"
           (with registers (-> system/zeroed
-                              (set-registers :a 0x85)
                               (->/in [:registers]
+                                     (assoc :a 0x85)
                                      (registers/set-flags
                                        :carry       false
                                        :half-carry  true
