@@ -1,5 +1,5 @@
 (ns bar.registers
-  (:require [bar.util :refer [truncate-byte half-carried? bytes->word]])
+  (:require [bar.util :refer [truncate-byte byte-half-carried? bytes->word]])
   (:require-macros [lonocloud.synthread :as ->]))
 
 (def zeroed
@@ -51,4 +51,4 @@
     {:value         truncated-value
      :zero?         (zero? truncated-value)
      :carried?      (> updated-value 0xff)
-     :half-carried? #(half-carried? value % truncated-value)}))
+     :half-carried? #(byte-half-carried? value % truncated-value)}))

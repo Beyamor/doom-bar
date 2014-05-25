@@ -180,3 +180,36 @@
           (it "should store the stack pointer values"
               (should= 0xf8 (memory/load @memory 0xc100))
               (should= 0xff (memory/load @memory 0xc101))))
+
+(describe "the add-register-words instruction"
+          (with registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :h 0x8a
+                                            :l 0x23
+                                            :b 0x06
+                                            :c 0x05)
+                                     (registers/unset-flag :operation))
+                              (ops/execute (ops/add-register-words :b :c))
+                              :registers))
+          (it "should add the values"
+              (should= 0x90 (@registers :h))
+              (should= 0x28 (@registers :l)))
+          (it "should unset the operation flag"
+              (should-not (registers/flag-set? @registers :operation)))
+          (it "should set the half-carry flag"
+              (should (registers/flag-set? @registers :half-carry)))
+
+          (with registers2 (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :h 0x8a
+                                            :l 0x23)
+                                     (registers/unset-flag :operation))
+                              (ops/execute (ops/add-register-words :h :l))
+                              :registers))
+          (it "should add the values"
+              (should= 0x14 (@registers2 :h))
+              (should= 0x46 (@registers2 :l)))
+          (it "should set the half-carry flag"
+              (should (registers/flag-set? @registers2 :half-carry)))
+          (it "should set the carry flag"
+              (should (registers/flag-set? @registers2 :carry))))

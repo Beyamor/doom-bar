@@ -7,13 +7,24 @@
 
 (def truncate-byte (partial bit-and 0xff))
 
-(defn half-carried?
+(def truncate-word (partial bit-and 0xffff))
+
+(defn byte-half-carried?
   [addend1 addend2 result]
   (-> (bit-xor addend1 addend2 result)
-      (bit-and 0x10)
-      zero? not))
+      (bit-test 4)))
+
+(defn word-half-carried?
+  [addend1 addend2 result]
+  (-> (bit-xor addend1 addend2 result)
+      (bit-test 10)))
 
 (defn bytes->word
   [high-byte low-byte]
   (bit-or (bit-shift-left high-byte 8)
           low-byte))
+
+(defn word->bytes
+  [word]
+  [(-> word (bit-shift-right 8) truncate-byte)
+   (-> word truncate-byte)])
