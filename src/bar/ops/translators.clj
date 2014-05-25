@@ -28,7 +28,12 @@
              `(bar.ops/load-immediate-value ~r))
 
            [[true 'a16] [false 'SP]]
-           `bar.ops/store-stack-pointer)))
+           `bar.ops/store-stack-pointer
+
+           [[false _] [true _]]
+           (let [[r] (symbol->keywords arg1)
+                 [h l] (symbol->keywords arg2)]
+             `(bar.ops/load-from-registers-address ~r ~h ~l)))))
 
 (defmacro INC
   [arg1]

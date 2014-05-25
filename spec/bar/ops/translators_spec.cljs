@@ -31,6 +31,16 @@
           (it "should handle the store-from-registers-address form"
               (should= 23 (memory/load @memory 0x0908)))
 
+          (it "should handle the load-from-registers-address form"
+              (should= 0x2f (-> system/zeroed
+                                (->/in [:memory]
+                                       (memory/store 0x1234 0x2f))
+                                (->/in [:registers]
+                                       (assoc :b 0x12
+                                              :c 0x34))
+                                (ops/execute (LD A, (BC)))
+                                :registers :a)))
+
           (with registers2 (-> system/zeroed
                                (->/in [:memory]
                                       (memory/store 0 2))
