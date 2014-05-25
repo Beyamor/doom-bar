@@ -23,15 +23,6 @@
 (def no-op
   [1 (return nil)])
 
-(defn addr
-  [r]
-  [1
-   (m/do value <- (read-register r)
-         {:keys [half-carried? zero? carried?]} <- (update-register :a + value)
-         (set-flags :carry      carried?
-                    :half-carry (half-carried? value)
-                    :zero       zero?))])
-
 (defn load-to-registers
   [r1 r2]
   [3
