@@ -6,28 +6,28 @@
   (->> symbol
        name
        .toCharArray
-       (map str)
-       (map #(.toLowerCase %))
-       (map keyword)))
+       (map #(-> % str .toLowerCase keyword))))
 
 (defmacro LD
   [arg1 arg2]
-  (let [is-list? (list? arg1)
-        arg1 (if is-list? (first arg1) arg1)]
-    (match [is-list? arg1 arg2]
-           [true _ 'A]
+  (let [arg1-is-list? (list? arg1)
+        arg1          (if arg1-is-list? (first arg1) arg1)
+        arg2-is-list? (list? arg2)
+        arg2          (if arg2-is-list? (first arg2) arg2)]
+    (match [[arg1-is-list? arg1] [arg2-is-list? arg2]]
+           [[true _] [false 'A]]
            (let [[r1 r2] (symbol->keywords arg1)]
              `(bar.ops/store-from-registers-address ~r1 ~r2))
 
-           [false _ 'd16]
+           [[false _] [false 'd16]]
            (let [[r1 r2] (symbol->keywords arg1)]
              `(bar.ops/load-to-registers ~r1 ~r2))
 
-           [false _ 'd8]
+           [[false _] [false 'd8]]
            (let [[r] (symbol->keywords arg1)]
              `(bar.ops/load-immediate-value ~r))
 
-           [true 'd16 'SP]
+           [[true 'd16] [false 'SP]]
            `bar.ops/store-stack-pointer)))
 
 (defmacro INC
