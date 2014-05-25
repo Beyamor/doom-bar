@@ -27,7 +27,7 @@
            (let [[r] (symbol->keywords arg1)]
              `(bar.ops/load-immediate-value ~r))
 
-           [[true 'd16] [false 'SP]]
+           [[true 'a16] [false 'SP]]
            `bar.ops/store-stack-pointer)))
 
 (defmacro INC
@@ -46,3 +46,8 @@
   [r]
   (let [[r] (symbol->keywords r)]
     `(bar.ops/decrement-register ~r)))
+
+(defmacro ADD
+  [arg1 arg2]
+  (let [[h l] (symbol->keywords arg2)]
+    `(bar.ops/add-register-words ~h ~l)))

@@ -1,7 +1,7 @@
 (ns bar.ops.translators-spec
   (:require-macros [speclj.core :refer [describe it should= should should-not should-throw with]]
                    [lonocloud.synthread :as ->]
-                   [bar.ops.translators :refer [LD INC DEC]])
+                   [bar.ops.translators :refer [LD INC DEC ADD]])
   (:require [speclj.core]
             [clojure.data :as data]
             [bar.registers :as registers]
@@ -47,7 +47,7 @@
                            (->/in [:memory]
                                   (memory/store 0 0x00)
                                   (memory/store 1 0xc1))
-                           (ops/execute (LD (d16), SP))
+                           (ops/execute (LD (a16), SP))
                            :memory))
           (it "should handle the store-stack-pointer form"
               (should= 0xf8 (memory/load @memory 0xc100))
@@ -103,3 +103,17 @@
                                          (assoc :b 0))
                                   (ops/execute op)
                                   :registers :b)))))
+
+(describe "ADD"
+          (with registers (-> system/zeroed
+                               (->/in [:registers]
+                                      (assoc :h 0x8a
+                                             :l 0x23
+                                             :b 0x06
+                                             :c 0x05)
+                                      (registers/unset-flag :operation))
+                               (ops/execute (ADD HL, BC))
+                               :registers))
+          (it "should handle the add-register-words form"
+              (should= 0x90 (@registers :h))
+              (should= 0x28 (@registers :l))))
