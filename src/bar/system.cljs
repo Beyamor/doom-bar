@@ -1,6 +1,7 @@
 (ns bar.system
   (:require [bar.registers :as registers]
-            [bar.memory :as memory])
+            [bar.memory :as memory]
+            [bar.util :refer [bytes->word]])
   (:require-macros [bar.system.macros :as m])
   (:refer-clojure :exclude [get-in update-in]))
 
@@ -56,8 +57,7 @@
 (def read-next-word
   (m/do low <- read-next-byte
         high <- read-next-byte
-        (return (bit-or (bit-shift-left high 8)
-                        low))))
+        (return (bytes->word high low))))
 
 (defn set-register
   [r value]

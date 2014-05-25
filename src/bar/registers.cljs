@@ -1,5 +1,5 @@
 (ns bar.registers
-  (:require [bar.util :refer [truncate-byte half-carried?]])
+  (:require [bar.util :refer [truncate-byte half-carried? bytes->word]])
   (:require-macros [lonocloud.synthread :as ->]))
 
 (def zeroed
@@ -41,9 +41,7 @@
 
 (defn address
   [registers h l]
-  (bit-or
-    (-> registers h (bit-shift-left 8))
-    (-> registers l)))
+  (bytes->word (registers h) (registers l)))
 
 (defn update-register
   [registers r f & args]

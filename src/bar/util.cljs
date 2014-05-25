@@ -12,3 +12,8 @@
   (-> (bit-xor addend1 addend2 result)
       (bit-and 0x10)
       zero? not))
+
+(defn bytes->word
+  [high-byte low-byte]
+  (bit-or (bit-shift-left high-byte 8)
+          low-byte))
