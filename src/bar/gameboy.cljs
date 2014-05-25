@@ -7,7 +7,16 @@
 
 (def ops
   [; 0x0
-   NOP    (LD BC, d16)    (LD (BC), A)    (INC BC)    (DEC B)   (LD B, d8)  RLCA    (LD (a16), SP)    (ADD HL, BC)    (LD A, (BC))])
+   NOP
+   (LD BC, d16)
+   (LD (BC), A)
+   (INC BC)
+   (DEC B)
+   (LD B, d8)
+   RLCA
+   (LD (a16), SP)
+   (ADD HL, BC)
+   (LD A, (BC))])
 
 (def bios
   [0x31 0xFE 0xFF 0xAF 0x21 0xFF 0x9F 0x32 0xCB 0x7C 0x20 0xFB 0x21 0x26 0xFF 0x0E
