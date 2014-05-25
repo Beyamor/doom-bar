@@ -213,3 +213,14 @@
               (should (registers/flag-set? @registers2 :half-carry)))
           (it "should set the carry flag"
               (should (registers/flag-set? @registers2 :carry))))
+
+(describe "a load-from-registers-address"
+          (it "should load a value from memory"
+              (should= 0x2f (-> system/zeroed
+                                (->/in [:memory]
+                                       (memory/store 0x1234 0x2f))
+                                (->/in [:registers]
+                                       (assoc :b 0x12
+                                              :c 0x34))
+                                (ops/execute (ops/load-from-registers-address :a :b :c))
+                                :registers :a))))

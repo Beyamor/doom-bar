@@ -3,7 +3,7 @@
             [bar.memory :as memory]
             [bar.system :refer [read-next-byte set-registers store-in-memory read-register
                                 update-register set-flags read-registers read-register-address
-                                read-memory return set-register read-next-word]]
+                                read-memory return set-register read-next-word get-address-in-registers]]
             [bar.util :refer [truncate-byte bytes->word truncate-word word->bytes
                               word-half-carried?]])
  (:require-macros [lonocloud.synthread :as ->]
@@ -35,14 +35,20 @@
 (defn store-from-registers-address
   [h l]
   [2
-   (m/do {:keys [a] :as registers} <- read-registers
-         :let [address (registers/address registers h l)]
-         (store-in-memory address a))])
+   (m/do value    <- (read-register :a)
+         address  <- (get-address-in-registers h l)
+         (store-in-memory address value))])
+
+(defn load-from-registers-address
+  [r h l]
+  [1
+   (m/do value <- (read-register-address h l)
+         (set-register r value))])
 
 (defn increment-registers-address 
   [h l]
   [1
-   (m/do address  <- (read-register-address h l)
+   (m/do address  <- (get-address-in-registers h l)
          memory   <- read-memory
          :let [value (-> memory (memory/load address) inc truncate-byte)]
          (store-in-memory address value))]) 

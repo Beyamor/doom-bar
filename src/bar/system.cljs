@@ -71,10 +71,20 @@
   [address value]
   (update-in [:memory] memory/store address value))
 
-(defn read-register-address 
+(defn get-address-in-registers 
   [h l]
   (m/do registers <- read-registers
         (-> registers (registers/address h l) return)))
+
+(defn read-memory-at
+  [address]
+  (m/do memory <- read-memory
+        (return (memory/load memory address))))
+
+(defn read-register-address
+  [h l]
+  (m/do address <- (get-address-in-registers h l)
+        (read-memory-at address)))
 
 (defn update-register
   [r f & args]

@@ -27,7 +27,7 @@
                                 (->/in [:registers]
                                        (assoc :a 0x12
                                               :b 0x34))
-                                ((s/read-register-address :a :b))
+                                ((s/get-address-in-registers :a :b))
                                 first))))
 
 (describe "set-registers"
