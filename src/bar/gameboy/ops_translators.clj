@@ -1,4 +1,4 @@
-(ns bar.ops.translators
+(ns bar.gameboy.ops-translators
   (:require [clojure.core.match :refer [match]]))
 
 (defn symbol->keywords

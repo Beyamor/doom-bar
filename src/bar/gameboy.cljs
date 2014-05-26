@@ -1,6 +1,6 @@
 (ns bar.gameboy
   (:require [bar.ops :refer [no-op]])
-  (:require-macros [bar.ops.translators :refer [LD INC DEC ADD]]))
+  (:require-macros [bar.gameboy.ops-translators :refer [LD INC DEC ADD]]))
 
 (def NOP  bar.ops/no-op)
 (def RLCA bar.ops/rlca)

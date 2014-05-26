@@ -1,7 +1,7 @@
-(ns bar.ops.translators-spec
+(ns bar.gameboy.ops-translators-spec
   (:require-macros [speclj.core :refer [describe it should= should should-not should-throw with]]
                    [lonocloud.synthread :as ->]
-                   [bar.ops.translators :refer [LD INC DEC ADD]])
+                   [bar.gameboy.ops-translators :refer [LD INC DEC ADD]])
   (:require [speclj.core]
             [clojure.data :as data]
             [bar.registers :as registers]
