@@ -45,13 +45,22 @@
    (m/do value <- (read-register-address h l)
          (set-register r value))])
 
+(defn update-registers-address
+  [h l update]
+  (m/do address  <- (get-address-in-registers h l)
+        memory   <- read-memory
+        :let [value (-> memory (memory/load address) update truncate-byte)]
+        (store-in-memory address value)))
+
 (defn increment-registers-address 
   [h l]
   [1
-   (m/do address  <- (get-address-in-registers h l)
-         memory   <- read-memory
-         :let [value (-> memory (memory/load address) inc truncate-byte)]
-         (store-in-memory address value))]) 
+   (update-registers-address h l inc)]) 
+
+(defn decrement-registers-address 
+  [h l]
+  [1
+   (update-registers-address h l dec)]) 
 
 (defn increment-register
   [r]

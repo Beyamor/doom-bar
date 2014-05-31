@@ -138,6 +138,29 @@
                           :registers
                           (registers/flag-set? :half-carry)))))
 
+(describe "an decrement registers address instruction"
+          (it "should decrement the contents of that memory location"
+              (should= 1 (-> system/zeroed
+                             (->/in [:registers]
+                                    (assoc :b 9
+                                           :c 8))
+                             (->/in [:memory]
+                                    (memory/store 0x0908 2))
+                             (ops/execute (ops/decrement-registers-address :b :c))
+                             :memory
+                             (memory/load 0x0908))))
+
+          (it "should wrap"
+              (should= 0xff (-> system/zeroed
+                             (->/in [:registers]
+                                    (assoc :b 9
+                                           :c 8))
+                             (->/in [:memory]
+                                    (memory/store 0x0908 0))
+                             (ops/execute (ops/decrement-registers-address :b :c))
+                             :memory
+                             (memory/load 0x0908)))))
+
 (describe "a load immediate value to register instruction"
           (with registers (-> system/zeroed
                               (->/in [:memory]
