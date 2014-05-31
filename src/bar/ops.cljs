@@ -95,6 +95,17 @@
                     :half-carry false
                     :operation  false))])
 
+(def rrca
+  [1
+   (m/do {:keys [carried?]} <- (update-register :a
+                                                #(let [low?       (bit-test % 0)
+                                                       shifted-a  (bit-shift-right % 1)]
+                                                   (-> shifted-a (->/when low? (bit-or 2r10000000)))))
+         (set-flags :carry      :carried?
+                    :zero       false
+                    :half-carry false
+                    :operation  false))])
+
 (def store-stack-pointer
   [3
    (m/do sp <- (read-register :sp)
