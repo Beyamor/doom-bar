@@ -5,6 +5,7 @@
 (def NOP  bar.ops/no-op)
 (def RLCA bar.ops/rlca)
 (def RRCA bar.ops/rrca)
+(def STOP [0 (fn [& _] (throw "STOP not implemented"))])
 
 (def ops
   [; 0x0
