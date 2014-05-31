@@ -48,9 +48,16 @@
              `(bar.ops/increment-register ~r)))))
 
 (defmacro DEC
-  [r]
-  (let [[r] (symbol->keywords r)]
-    `(bar.ops/decrement-register ~r)))
+  [arg1]
+  (let [registers (symbol->keywords arg1)]
+    (match (count registers)
+           2
+           (let [[r1 r2] registers]
+             `(bar.ops/decrement-registers-address ~r1 ~r2))
+
+           1
+           (let [[r] registers]
+             `(bar.ops/decrement-register ~r)))))
 
 (defmacro ADD
   [arg1 arg2]

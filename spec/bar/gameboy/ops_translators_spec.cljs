@@ -73,7 +73,6 @@
                              (ops/execute (INC BC))
                              :memory
                              (memory/load 0x0908)))
-
               (should= 0 (-> system/zeroed
                              (->/in [:registers]
                                     (assoc :b 9
@@ -107,7 +106,27 @@
                                 (->/in [:registers]
                                        (assoc :b 0))
                                 (ops/execute (DEC B))
-                                :registers :b))))
+                                :registers :b)))
+
+          (it "should handle the decrement-registers-address form"
+              (should= 1 (-> system/zeroed
+                             (->/in [:registers]
+                                    (assoc :b 9
+                                           :c 8))
+                             (->/in [:memory]
+                                    (memory/store 0x0908 2))
+                             (ops/execute (DEC BC))
+                             :memory
+                             (memory/load 0x0908)))
+              (should= 0xff (-> system/zeroed
+                             (->/in [:registers]
+                                    (assoc :b 9
+                                           :c 8))
+                             (->/in [:memory]
+                                    (memory/store 0x0908 0))
+                             (ops/execute (DEC BC))
+                             :memory
+                             (memory/load 0x0908)))))
 
 (describe "ADD"
           (with registers (-> system/zeroed
