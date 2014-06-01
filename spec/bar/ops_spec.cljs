@@ -192,6 +192,26 @@
               (should-not (registers/flag-set? @registers :zero))
               (should-not (registers/flag-set? @registers :operation))))
 
+(describe "the rla instruction"
+          (with registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :a 0x95)
+                                     (registers/set-flags
+                                       :carry       true
+                                       :half-carry  true
+                                       :zero        true
+                                       :operation   true))
+                              (ops/execute ops/rla)
+                              :registers))
+          (it "should rotate the bits in A"
+              (should= 0x2b (@registers :a)))
+          (it "should set the carry flag"
+              (should (registers/flag-set? @registers :carry)))
+          (it "should unset the other flags"
+              (should-not (registers/flag-set? @registers :half-carry))
+              (should-not (registers/flag-set? @registers :zero))
+              (should-not (registers/flag-set? @registers :operation))))
+
 (describe "the rrca instruction"
           (with registers (-> system/zeroed
                               (->/in [:registers]

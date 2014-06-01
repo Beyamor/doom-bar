@@ -90,18 +90,34 @@
                                                 #(let [shifted-a (bit-shift-left % 1)
                                                        high?     (bit-test shifted-a 8)]
                                                    (-> shifted-a (->/when high? (bit-or 1)))))
-         (set-flags :carry      :carried?
+         (set-flags :carry      carried?
+                    :zero       false
+                    :half-carry false
+                    :operation  false))])
+
+(def rla
+  [1
+   (m/do registers <- read-registers
+         {:keys [carried?]} <- (update-register :a
+                                                #(-> %
+                                                     (bit-shift-left 1)
+                                                     (->/when (registers/flag-set? registers :carry)
+                                                       (bit-or 1))))
+         (set-flags :carry      carried?
                     :zero       false
                     :half-carry false
                     :operation  false))])
 
 (def rrca
   [1
-   (m/do {:keys [carried?]} <- (update-register :a
-                                                #(let [low?       (bit-test % 0)
-                                                       shifted-a  (bit-shift-right % 1)]
-                                                   (-> shifted-a (->/when low? (bit-or 2r10000000)))))
-         (set-flags :carry      :carried?
+   (m/do a <- (read-register :a)
+         :let [low? (bit-test a 0)]
+         (update-register :a
+                          #(-> %
+                               (bit-shift-right 1)
+                               (->/when low?
+                                 (bit-or 2r10000000))))
+         (set-flags :carry      low?
                     :zero       false
                     :half-carry false
                     :operation  false))])
