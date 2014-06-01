@@ -1,6 +1,8 @@
 (ns bar.registers
-  (:require [bar.util :refer [truncate-byte byte-half-carried? bytes->word]])
+  (:require [bar.util :refer [truncate-byte truncate-word byte-half-carried? bytes->word]])
   (:require-macros [lonocloud.synthread :as ->]))
+
+(def word-register? #{:pc :sp})
 
 (def zeroed
   (into {}
@@ -47,7 +49,10 @@
   [registers r f & args]
   (let [value           (get registers r)
         updated-value   (apply f value args)
-        truncated-value (truncate-byte updated-value)]
+        truncated-value (-> updated-value
+                            (->/if (word-register? r)
+                              truncate-word
+                              truncate-byte))]
     {:value         truncated-value
      :zero?         (zero? truncated-value)
      :carried?      (> updated-value 0xff)

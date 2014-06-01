@@ -28,3 +28,16 @@
   [word]
   [(-> word (bit-shift-right 8) truncate-byte)
    (-> word truncate-byte)])
+
+(defn bool->int
+  [true?]
+  (if true? 1 0))
+
+(defn ->signed-byte
+  [byte]
+  (+ (-> byte (bit-test 7) bool->int (* -128))
+     (->> (range 7)
+          (map (fn [bit]
+                 (* (bool->int (bit-test byte bit))
+                    (Math/pow 2 bit))))
+          (reduce +))))

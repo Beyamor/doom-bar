@@ -63,3 +63,9 @@
   [arg1 arg2]
   (let [[h l] (symbol->keywords arg2)]
     `(bar.ops/add-register-words ~h ~l)))
+
+(defmacro JR
+  [& args]
+  (match [(vec args)]
+         [['r8]]
+         `bar.ops/immediate-relative-jump))

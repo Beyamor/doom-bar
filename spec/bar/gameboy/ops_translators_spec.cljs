@@ -1,7 +1,7 @@
 (ns bar.gameboy.ops-translators-spec
   (:require-macros [speclj.core :refer [describe it should= should should-not should-throw with]]
                    [lonocloud.synthread :as ->]
-                   [bar.gameboy.ops-translators :refer [LD INC DEC ADD]])
+                   [bar.gameboy.ops-translators :refer [LD INC DEC ADD JR]])
   (:require [speclj.core]
             [clojure.data :as data]
             [bar.registers :as registers]
@@ -141,3 +141,18 @@
           (it "should handle the add-register-words form"
               (should= 0x90 (@registers :h))
               (should= 0x28 (@registers :l))))
+
+(describe "JR"
+          (let [jump (fn [starting-address offset]
+                       (-> system/zeroed
+                           (->/in [:registers]
+                                  (assoc :pc starting-address))
+                           (->/in [:memory]
+                                  (memory/store starting-address offset))
+                           (ops/execute (JR r8))
+                           :registers :pc))]
+            (it "should handle the immediate-relative-jump form"
+                (should= 201 (jump 150 50))
+                (should= 101 (jump 150 -50))
+                (should= (+ 0xff 50 1) (jump 0xff 50))
+                (should= (+ 0xffff -50 2) (jump 0 -50)))))

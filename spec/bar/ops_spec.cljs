@@ -287,3 +287,18 @@
                                               :c 0x34))
                                 (ops/execute (ops/load-from-registers-address :a :b :c))
                                 :registers :a))))
+
+(describe "the immediate-relative-jump instruction"
+          (let [jump (fn [starting-address offset]
+                       (-> system/zeroed
+                           (->/in [:registers]
+                                  (assoc :pc starting-address))
+                           (->/in [:memory]
+                                  (memory/store starting-address offset))
+                           (ops/execute ops/immediate-relative-jump)
+                           :registers :pc))]
+            (it "should jump by the offset"
+                (should= 201 (jump 150 50))
+                (should= 101 (jump 150 -50))
+                (should= (+ 0xff 50 1) (jump 0xff 50))
+                (should= (+ 0xffff -50 2) (jump 0 -50)))))
