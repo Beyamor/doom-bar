@@ -1,6 +1,6 @@
 (ns bar.gameboy
   (:require [bar.ops :refer [no-op]])
-  (:require-macros [bar.gameboy.ops-translators :refer [LD INC DEC ADD]]))
+  (:require-macros [bar.gameboy.ops-translators :refer [LD INC DEC ADD JR]]))
 
 (def NOP  bar.ops/no-op)
 (def RLCA bar.ops/rlca)
@@ -33,7 +33,8 @@
    (INC D)
    (DEC D)
    (LD D, d8)
-   RLA])
+   RLA
+   (JR r8)])
 
 (def bios
   [0x31 0xFE 0xFF 0xAF 0x21 0xFF 0x9F 0x32 0xCB 0x7C 0x20 0xFB 0x21 0x26 0xFF 0x0E

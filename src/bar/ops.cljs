@@ -5,7 +5,7 @@
                                 update-register set-flags read-registers read-register-address
                                 read-memory return set-register read-next-word get-address-in-registers]]
             [bar.util :refer [truncate-byte bytes->word truncate-word word->bytes
-                              word-half-carried?]])
+                              word-half-carried? ->signed-byte]])
  (:require-macros [lonocloud.synthread :as ->]
                   [bar.system.macros :as m]))
 
@@ -146,3 +146,8 @@
            (set-flags :operation  false
                       :carry      (> result 0xffff)
                       :half-carry (word-half-carried? value1 value2 truncated-result)))]))
+
+(def immediate-relative-jump
+  [2
+   (m/do offset <- read-next-byte
+         (update-register :pc + (->signed-byte offset)))])
