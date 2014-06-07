@@ -232,6 +232,26 @@
               (should-not (registers/flag-set? @registers :zero))
               (should-not (registers/flag-set? @registers :operation))))
 
+(describe "the rra instruction"
+          (with registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :a 0x81)
+                                     (registers/set-flags
+                                       :carry       false
+                                       :half-carry  true
+                                       :zero        true
+                                       :operation   true))
+                              (ops/execute ops/rra)
+                              :registers))
+          (it "should rotate the bits in A"
+              (should= 0x40 (@registers :a)))
+          (it "should set the carry flag"
+              (should (registers/flag-set? @registers :carry)))
+          (it "should unset the other flags"
+              (should-not (registers/flag-set? @registers :half-carry))
+              (should-not (registers/flag-set? @registers :zero))
+              (should-not (registers/flag-set? @registers :operation))))
+
 (describe "the store-stack-pointer instruction"
           (with memory (-> system/zeroed
                            (assoc-in [:registers :sp] 0xfff8)

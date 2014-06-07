@@ -89,7 +89,7 @@
    (m/do {:keys [carried?]} <- (update-register :a
                                                 #(let [shifted-a (bit-shift-left % 1)
                                                        high?     (bit-test shifted-a 8)]
-                                                   (-> shifted-a (->/when high? (bit-or 1)))))
+                                                   (-> shifted-a (->/when high? (bit-set 0)))))
          (set-flags :carry      carried?
                     :zero       false
                     :half-carry false
@@ -102,7 +102,7 @@
                                                 #(-> %
                                                      (bit-shift-left 1)
                                                      (->/when (registers/flag-set? registers :carry)
-                                                       (bit-or 1))))
+                                                       (bit-set 0))))
          (set-flags :carry      carried?
                     :zero       false
                     :half-carry false
@@ -116,7 +116,21 @@
                           #(-> %
                                (bit-shift-right 1)
                                (->/when low?
-                                 (bit-or 2r10000000))))
+                                 (bit-set 7))))
+         (set-flags :carry      low?
+                    :zero       false
+                    :half-carry false
+                    :operation  false))])
+
+(def rra
+  [1
+   (m/do registers <- read-registers
+         :let [low? (bit-test (registers :a) 0)]
+         {:keys [carried?]} <- (update-register :a
+                                                #(-> %
+                                                     (bit-shift-right 1)
+                                                     (->/when (registers/flag-set? registers :carry)
+                                                       (bit-set 7))))
          (set-flags :carry      low?
                     :zero       false
                     :half-carry false
