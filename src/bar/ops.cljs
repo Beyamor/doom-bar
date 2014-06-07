@@ -165,3 +165,11 @@
   [2
    (m/do offset <- read-next-byte
          (update-register :pc + (->signed-byte offset)))])
+
+(defn conditional-relative-jump
+  [required-flags]
+  [2
+   (m/do offset <- read-next-byte
+         registers <- read-registers
+         :when (registers/flags-set? registers required-flags)
+         (update-register :pc + (->signed-byte offset)))])

@@ -22,6 +22,10 @@
   (let [flag (get flags flag-name)]
     (-> registers :f (bit-and flag) (= flag))))
 
+(defn flags-set?
+  [registers flag-names]
+  (every? #(flag-set? registers %) flag-names))
+
 (defn set-flag
   [registers flag-name]
   (-> registers

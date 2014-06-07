@@ -322,3 +322,25 @@
                 (should= 101 (jump 150 -50))
                 (should= (+ 0xff 50 1) (jump 0xff 50))
                 (should= (+ 0xffff -50 2) (jump 0 -50)))))
+
+(describe "the conditional-relative-jump instruction"
+          (let [jump (fn [starting-address offset required-flags actual-flags]
+                       (-> system/zeroed
+                           (->/in [:registers]
+                                  (assoc :pc starting-address)
+                                  (#(reduce registers/set-flag % actual-flags)))
+                           (->/in [:memory]
+                                  (memory/store starting-address offset))
+                           (ops/execute (ops/conditional-relative-jump required-flags))
+                           :registers :pc))]
+            (it "should jump by the offset when the flags are set"
+                (should= 201 (jump 150 50 [:zero] [:zero]))
+                (should= 101 (jump 150 -50 [:zero] [:zero]))
+                (should= (+ 0xff 50 1) (jump 0xff 50 [:zero] [:zero]))
+                (should= (+ 0xffff -50 2) (jump 0 -50 [:zero] [:zero])))
+
+            (it "should not jump when the flags aren't set"
+                (should= 151 (jump 150 50 [:zero] []))
+                (should= 151 (jump 150 -50 [:zero] []))
+                (should= 0x100 (jump 0xff 50 [:zero] []))
+                (should= 1 (jump 0 -50 [:zero] [])))))

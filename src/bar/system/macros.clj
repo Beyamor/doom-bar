@@ -17,6 +17,11 @@
               :bindings (second forms)}
              (drop 2 forms)]
 
+            (= :when (first forms))
+            [{:type       :when
+              :condition  (second forms) }
+             (drop 2 forms)]
+
             :else
             [{:type   :normal
               :value  (first forms)}
@@ -39,8 +44,16 @@
                         ~body))
 
     :let
-    `(let ~(:bindings form)
-       ~body)))
+    `(fn [state#]
+       (let ~(:bindings form)
+         (~body state#)))
+
+    :when
+    `(fn [state#]
+       (let [handler# (if ~(:condition form)
+                       ~body
+                       (bar.system/return nil))]
+         (handler# state#)))))
 
 (defn build
   [[base & more-forms]]

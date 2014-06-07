@@ -65,7 +65,7 @@
     `(bar.ops/add-register-words ~h ~l)))
 
 (defmacro JR
-  [& args]
-  (match [(vec args)]
-         [['r8]]
-         `bar.ops/immediate-relative-jump))
+  ([arg]
+   (match arg
+          'r8
+          `bar.ops/immediate-relative-jump)))
