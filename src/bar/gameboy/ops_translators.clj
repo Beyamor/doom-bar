@@ -8,6 +8,12 @@
        .toCharArray
        (map #(-> % str .toLowerCase keyword))))
 
+(def short-register-name->long-register-name
+  {:z :zero
+   :n :operation
+   :h :half-carry
+   :c :carry})
+
 (defmacro LD
   [arg1 arg2]
   (let [arg1-is-list? (list? arg1)
@@ -68,4 +74,13 @@
   ([arg]
    (match arg
           'r8
-          `bar.ops/immediate-relative-jump)))
+          `bar.ops/immediate-relative-jump))
+
+  ([arg1 arg2]
+   (match [arg1 arg2]
+          [_ 'r8]
+          (let [required-flags (->> arg1
+                                    symbol->keywords
+                                    (map short-register-name->long-register-name)
+                                    vec)]
+            `(bar.ops/conditional-relative-jump ~required-flags)))))
