@@ -59,8 +59,18 @@
                             :memory))
           (it "should handle the store-stack-pointer form"
               (should= 0xf8 (memory/load @memory2 0xc100))
-              (should= 0xff (memory/load @memory2 0xc101))))
+              (should= 0xff (memory/load @memory2 0xc101)))
 
+          (let [system (-> system/zeroed
+                           (->/in [:registers]
+                                  (assoc :a 0x56
+                                         :h 0xff
+                                         :l 0xff))
+                           (ops/execute (LD (HL+), A)))]
+            (it "should handle the store-from-registers-address-and-increment  form"
+                (should= 0x56 (-> system :memory (memory/load 0xffff)))
+                (should= 0 (-> system :registers :h))
+                (should= 0 (-> system :registers :l)))))
 
 (describe "INC"
           (it "should handle the increment-registers-address form"

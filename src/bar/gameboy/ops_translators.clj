@@ -21,6 +21,9 @@
         arg2-is-list? (list? arg2)
         arg2          (if arg2-is-list? (first arg2) arg2)]
     (match [[arg1-is-list? arg1] [arg2-is-list? arg2]]
+           [[true 'HL+] [false 'A]]
+           `(bar.ops/store-from-registers-address-and-increment :h :l)
+
            [[true _] [false 'A]]
            (let [[r1 r2] (symbol->keywords arg1)]
              `(bar.ops/store-from-registers-address ~r1 ~r2))

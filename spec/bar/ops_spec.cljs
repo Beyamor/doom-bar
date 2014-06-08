@@ -46,6 +46,20 @@
                               :memory
                               (memory/load 0x0908)))))
 
+(describe "a store-from-registers-and-increment instruction"
+          (with system (-> system/zeroed
+                           (->/in [:registers]
+                                  (assoc :a 0x56
+                                         :b 0xff
+                                         :c 0xff))
+                           (ops/execute (ops/store-from-registers-address-and-increment :b :c))))
+          (it "should store a value in memory"
+              (should= 0x56 (-> @system :memory (memory/load 0xffff))))
+          (it "should increment the registers"
+              (should= 0 (-> @system :registers :b))
+              (should= 0 (-> @system :registers :c))))
+
+
 (describe "an increment registers address instruction"
           (it "should increment the contents of that memory location"
               (should= 2 (-> system/zeroed

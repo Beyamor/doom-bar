@@ -39,6 +39,21 @@
          address  <- (get-address-in-registers h l)
          (store-in-memory address value))])
 
+(defn store-from-registers-address-and-increment
+  [h l]
+  [2
+   (m/do value    <- (read-register :a)
+         address  <- (get-address-in-registers h l)
+         (store-in-memory address value)
+         high-value <- (read-register h)
+         low-value  <- (read-register l)
+         :let [[high-value low-value] (-> (bytes->word high-value low-value)
+                                          inc
+                                          truncate-word
+                                          word->bytes)]
+         (set-registers h high-value
+                        l low-value))])
+
 (defn load-from-registers-address
   [r h l]
   [1
@@ -82,7 +97,7 @@
   [r]
   [2
    (m/do value <- read-next-byte
-         (set-registers r value))])
+         (set-register r value))])
 
 (def rlca
   [1
