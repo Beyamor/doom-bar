@@ -8,6 +8,7 @@
 (def RRCA bar.ops/rrca)
 (def RRA bar.ops/rra)
 (def STOP [0 (fn [& _] (throw "STOP not implemented"))])
+(def DAA bar.ops/daa)
 
 (def ops
   [; 0x0
@@ -50,7 +51,8 @@
    (INC HL)
    (INC H)
    (DEC H)
-   (LD H, d8)])
+   (LD H, d8)
+   DAA])
 
 (def bios
   [0x31 0xFE 0xFF 0xAF 0x21 0xFF 0x9F 0x32 0xCB 0x7C 0x20 0xFB 0x21 0x26 0xFF 0x0E

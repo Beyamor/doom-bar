@@ -33,6 +33,8 @@
   [true?]
   (if true? 1 0))
 
+(def int->bool (complement zero?))
+
 (defn ->signed-byte
   [byte]
   (+ (-> byte (bit-test 7) bool->int (* -128))

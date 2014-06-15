@@ -358,3 +358,24 @@
                 (should= 151 (jump 150 -50 [:zero] []))
                 (should= 0x100 (jump 0xff 50 [:zero] []))
                 (should= 1 (jump 0 -50 [:zero] [])))))
+
+(describe "the daa instruction"
+          (with system (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :a 0x45 :b 0x38)
+                                     (registers/set-flag :half-carry)
+                                     (registers/set-flag :zero))
+                              (ops/execute (ops/add-registers :a :b))
+                              (ops/execute ops/daa)))
+          (it "should, I gunno, do its thing for additions"
+              (should= 0x83 (-> @system :registers :a))
+              (should-not (-> @system :registers (registers/flag-set? :carry)))
+              (should-not (-> @system :registers (registers/flag-set? :zero))))
+          (it "should unset half-carry"
+              (should-not (-> @system :registers (registers/flag-set? :half-carry))))
+
+          (with system2 (-> @system
+                            (ops/execute (ops/subtract-registers :a :b))
+                            (ops/execute ops/daa)))
+          (it "should also do its thing for subtractions"
+              (should= 0x45 (-> @system2 :registers :a))))

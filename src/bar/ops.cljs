@@ -5,9 +5,9 @@
                                 update-register set-flags read-registers read-register-address
                                 read-memory return set-register read-next-word get-address-in-registers]]
             [bar.util :refer [truncate-byte bytes->word truncate-word word->bytes
-                              word-half-carried? ->signed-byte]])
- (:require-macros [lonocloud.synthread :as ->]
-                  [bar.system.macros :as m]))
+                              word-half-carried? ->signed-byte int->bool bool->int in-range?]])
+  (:require-macros [lonocloud.synthread :as ->]
+                   [bar.system.macros :as m]))
 
 (defn execute
   [system [m f]]
@@ -158,6 +158,22 @@
          (store-in-memory address (-> sp truncate-byte))
          (store-in-memory (inc address) (-> sp (bit-shift-right 8) truncate-byte)))])
 
+(def add-registers
+  (fn [r1 r2]
+    [1
+     (m/do r2-value <- (read-register r2)
+           {:keys [carried?]} <- (update-register r1 + r2-value)
+           (set-flags :operation  false
+                      :carry      carried?))]))
+
+(defn subtract-registers
+  [r1 r2]
+  [1
+   (m/do r2-value <- (read-register r2)
+         {:keys [carried?]} <- (update-register r1 - r2-value)
+         (set-flags :operation  true
+                    :carry      carried?))])
+
 (def add-register-words
   (fn [hr2 lr2]
     [1
@@ -188,3 +204,43 @@
          registers <- read-registers
          :when (registers/flags-set? registers required-flags)
          (update-register :pc + (->signed-byte offset)))])
+
+(def daa-codes [[0 0 [0x0 0x9] 0 [0x0 0x9]]  [0x00 0]
+                [0 0 [0x0 0x8] 0 [0xa 0xf]]  [0x06 0]
+                [0 0 [0x0 0x9] 1 [0x0 0x3]]  [0x06 0]
+                [0 0 [0xa 0xf] 0 [0x0 0x9]]  [0x60 1]
+                [0 0 [0x9 0xf] 0 [0xa 0xf]]  [0x66 1]
+                [0 0 [0xa 0xf] 1 [0x0 0x3]]  [0x66 1]
+                [0 1 [0x0 0x2] 0 [0x0 0x9]]  [0x60 1]
+                [0 1 [0x0 0x2] 0 [0xa 0xf]]  [0x66 1]
+                [0 1 [0x0 0x3] 1 [0x0 0x3]]  [0x66 1]
+                [1 0 [0x0 0x9] 0 [0x0 0x9]]  [0x00 0]
+                [1 0 [0x0 0x8] 1 [0x6 0xf]]  [0xfa 0]
+                [1 1 [0x7 0xf] 0 [0x0 0x9]]  [0xa0 1]])
+
+(def daa-tests
+  (->> daa-codes
+       (partition 2)
+       (map (fn [[[operation? carry? high-range half-carry? low-range]
+                  [addend carried?]]]
+              (fn [registers high-bits low-bits]
+                (letfn [(get-flag [flag]
+                          (-> registers (registers/flag-set? flag) bool->int))]
+                  (when (and (= operation?  (get-flag :operation))
+                             (= carry?      (get-flag :carry))
+                             (= half-carry? (get-flag :operation))
+                             (apply in-range? high-bits high-range)
+                             (apply in-range? low-bits low-range))
+                    [addend (int->bool carried?)])))))))
+
+(def daa
+  [1
+   (m/do registers <- read-registers
+         :let [a                  (registers :a)
+               high-bits          (-> a (bit-shift-right 4) (bit-and 2r1111))
+               low-bits           (-> a (bit-and 2r1111))
+               [addend carried?]  (some #(% registers high-bits low-bits) daa-tests)]
+         {:keys [zero?]} <- (update-register :a + addend)
+         (set-flags :carry      carried?
+                    :zero       zero?
+                    :half-carry false))])
