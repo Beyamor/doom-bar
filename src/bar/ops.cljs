@@ -3,7 +3,8 @@
             [bar.memory :as memory]
             [bar.system :refer [read-next-byte set-registers store-in-memory read-register
                                 update-register set-flags read-registers read-register-address
-                                read-memory return set-register read-next-word get-address-in-registers]]
+                                read-memory return set-register read-next-word get-address-in-registers
+                                update-word-in-registers ]]
             [bar.util :refer [truncate-byte bytes->word truncate-word word->bytes
                               word-half-carried? ->signed-byte int->bool bool->int in-range?]])
   (:require-macros [lonocloud.synthread :as ->]
@@ -45,20 +46,20 @@
    (m/do value    <- (read-register :a)
          address  <- (get-address-in-registers h l)
          (store-in-memory address value)
-         high-value <- (read-register h)
-         low-value  <- (read-register l)
-         :let [[high-value low-value] (-> (bytes->word high-value low-value)
-                                          inc
-                                          truncate-word
-                                          word->bytes)]
-         (set-registers h high-value
-                        l low-value))])
+         (update-word-in-registers h l inc))])
 
 (defn load-from-registers-address
   [r h l]
   [1
    (m/do value <- (read-register-address h l)
          (set-register r value))])
+
+(defn load-from-registers-address-and-increment
+  [r h l]
+  [1
+   (m/do value <- (read-register-address h l)
+         (set-register r value)
+         (update-word-in-registers h l inc))])
 
 (defn update-registers-address
   [h l update]

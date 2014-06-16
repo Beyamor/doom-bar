@@ -1,7 +1,7 @@
 (ns bar.system
   (:require [bar.registers :as registers]
             [bar.memory :as memory]
-            [bar.util :refer [bytes->word]])
+            [bar.util :refer [bytes->word word->bytes truncate-word]])
   (:require-macros [bar.system.macros :as m])
   (:refer-clojure :exclude [get-in update-in]))
 
@@ -100,3 +100,14 @@
 (defn set-flag
   [flag value]
   (apply set-flags flag value))
+
+(defn update-word-in-registers 
+  [h l update]
+  (m/do high-value <- (read-register h)
+        low-value  <- (read-register l)
+        :let [[high-value low-value] (-> (bytes->word high-value low-value)
+                                         update
+                                         truncate-word
+                                         word->bytes)]
+        (set-registers h high-value
+                       l low-value)))

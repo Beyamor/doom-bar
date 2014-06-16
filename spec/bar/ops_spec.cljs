@@ -322,6 +322,20 @@
                                 (ops/execute (ops/load-from-registers-address :a :b :c))
                                 :registers :a))))
 
+(describe "a load-from-registers-address-and-increment"
+          (with system (-> system/zeroed
+                           (->/in [:memory]
+                                  (memory/store 0x01ff 0x56))
+                           (->/in [:registers]
+                                  (assoc :h 0x01
+                                         :l 0xff))
+                           (ops/execute (ops/load-from-registers-address-and-increment :a :h :l))))
+          (it "should load a value from memory"
+              (should= 0x56 (-> @system :registers :a)))
+          (it "should increment the register values"
+              (should= 0x02 (-> @system :registers :h))
+              (should= 0x00 (-> @system :registers :l))))
+
 (describe "the immediate-relative-jump instruction"
           (let [jump (fn [starting-address offset]
                        (-> system/zeroed
