@@ -67,10 +67,23 @@
                                          :h 0xff
                                          :l 0xff))
                            (ops/execute (LD (HL+), A)))]
-            (it "should handle the store-from-registers-address-and-increment  form"
+            (it "should handle the store-from-registers-address-and-increment form"
                 (should= 0x56 (-> system :memory (memory/load 0xffff)))
                 (should= 0 (-> system :registers :h))
-                (should= 0 (-> system :registers :l)))))
+                (should= 0 (-> system :registers :l))))
+
+          (let [system (-> system/zeroed
+                           (->/in [:memory]
+                                  (memory/store 0x01ff 0x56))
+                           (->/in [:registers]
+                                  (assoc :h 0x01
+                                         :l 0xff))
+                           (ops/execute (LD A, (HL+))))]
+            (it "should handle the load-from-registers-address-and-increment form"
+                (should= 0x56 (-> system :registers :a))
+                (should= 0x02 (-> system :registers :h))
+                (should= 0x00 (-> system :registers :l)))))
+
 
 (describe "INC"
           (it "should handle the increment-registers-address form"
