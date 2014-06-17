@@ -9,6 +9,7 @@
 (def RRA bar.ops/rra)
 (def STOP [0 (fn [& _] (throw "STOP not implemented"))])
 (def DAA bar.ops/daa)
+(def CPL bar.ops/ones-complement)
 
 (def ops
   [; 0x0
@@ -59,7 +60,8 @@
    (DEC HL)
    (INC L)
    (DEC L)
-   (LD L, d8)])
+   (LD L, d8)
+   CPL])
 
 (def bios
   [0x31 0xFE 0xFF 0xAF 0x21 0xFF 0x9F 0x32 0xCB 0x7C 0x20 0xFB 0x21 0x26 0xFF 0x0E

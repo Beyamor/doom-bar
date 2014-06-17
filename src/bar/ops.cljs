@@ -245,3 +245,9 @@
          (set-flags :carry      carried?
                     :zero       zero?
                     :half-carry false))])
+
+(def ones-complement
+  [1
+   (m/do (update-register :a bit-xor 0xff)
+         (set-flags :half-carry true
+                    :operation  true))])

@@ -393,3 +393,19 @@
                             (ops/execute ops/daa)))
           (it "should also do its thing for subtractions"
               (should= 0x45 (-> @system2 :registers :a))))
+
+(describe "the ones-complement instruction"
+          (with registers (-> system/zeroed
+                                (->/in [:registers]
+                                       (assoc :a 0x35))
+                                (ops/execute ops/ones-complement)
+                                :registers))
+
+          (it "should set a to its one's complement"
+              (should= 0xca (@registers :a)))
+
+          (it "should set operation"
+              (should (registers/flag-set? @registers :operation)))
+
+          (it "should set half-carry"
+              (should (registers/flag-set? @registers :half-carry))))
