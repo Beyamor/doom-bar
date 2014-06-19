@@ -73,6 +73,17 @@
                 (should= 0 (-> system :registers :l))))
 
           (let [system (-> system/zeroed
+                           (->/in [:registers]
+                                  (assoc :a 0x3c
+                                         :h 0x8a
+                                         :l 0x5c))
+                           (ops/execute (LD (HL-) A)))]
+            (it "should handle the store-from-registers-address-and-decrement form"
+                (should= 0x3c (-> system :memory (memory/load 0x8a5c)))
+                (should= 0x8a (-> system :registers :h))
+                (should= 0x5b (-> system :registers :l))))
+
+          (let [system (-> system/zeroed
                            (->/in [:memory]
                                   (memory/store 0x01ff 0x56))
                            (->/in [:registers]

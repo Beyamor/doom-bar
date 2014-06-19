@@ -59,6 +59,18 @@
               (should= 0 (-> @system :registers :b))
               (should= 0 (-> @system :registers :c))))
 
+(describe "a store-from-registers-and-decrement instruction"
+          (with system (-> system/zeroed
+                           (->/in [:registers]
+                                  (assoc :a 0x3c
+                                         :h 0x8a
+                                         :l 0x5c))
+                           (ops/execute (ops/store-from-registers-address-and-decrement :h :l))))
+          (it "should store a value in memory"
+              (should= 0x3c (-> @system :memory (memory/load 0x8a5c))))
+          (it "should decrement the registers"
+              (should= 0x8a (-> @system :registers :h))
+              (should= 0x5b (-> @system :registers :l))))
 
 (describe "an increment registers address instruction"
           (it "should increment the contents of that memory location"

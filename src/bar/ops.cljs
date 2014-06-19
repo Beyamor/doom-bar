@@ -40,13 +40,21 @@
          address  <- (get-address-in-registers h l)
          (store-in-memory address value))])
 
-(defn store-from-registers-address-and-increment
-  [h l]
+(defn store-from-registers-address-and-update
+  [h l update]
   [2
    (m/do value    <- (read-register :a)
          address  <- (get-address-in-registers h l)
          (store-in-memory address value)
-         (update-word-in-registers h l inc))])
+         (update-word-in-registers h l update))])
+
+(defn store-from-registers-address-and-increment
+  [h l]
+  (store-from-registers-address-and-update h l inc))
+
+(defn store-from-registers-address-and-decrement
+  [h l]
+  (store-from-registers-address-and-update h l dec))
 
 (defn load-from-registers-address
   [r h l]

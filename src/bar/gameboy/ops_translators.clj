@@ -24,6 +24,9 @@
            [[true 'HL+] [false 'A]]
            `(bar.ops/store-from-registers-address-and-increment :h :l)
 
+           [[true 'HL-] [false 'A]]
+           `(bar.ops/store-from-registers-address-and-decrement :h :l)
+
            [[false 'A] [true 'HL+]]
            `(bar.ops/load-from-registers-address-and-increment :a :h :l)
 
