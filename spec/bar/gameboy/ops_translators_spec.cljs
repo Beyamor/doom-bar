@@ -127,7 +127,14 @@
                              (->/in [:registers]
                                     (assoc :b 0xff))
                              (ops/execute (INC B))
-                             :registers :b))))
+                             :registers :b)))
+
+          (it "should handle sp"
+              (should= 2 (-> system/zeroed
+                             (->/in [:registers]
+                                    (assoc :sp 1))
+                             (ops/execute (INC SP))
+                             :registers :sp))))
 
 (describe "DEC"
           (it "should handle the decrement-register form"

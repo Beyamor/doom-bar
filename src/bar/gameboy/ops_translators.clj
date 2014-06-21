@@ -2,11 +2,19 @@
   (:require [clojure.core.match :refer [match]]))
 
 (defn symbol->keywords
-  [symbol]
-  (->> symbol
-       name
-       .toCharArray
-       (map #(-> % str .toLowerCase keyword))))
+  [split]
+  (fn [symbol]
+    (->> symbol
+         name
+         .toLowerCase
+         split
+         (map #(-> % str keyword)))))
+
+(def symbol->registers
+  (symbol->keywords #(re-seq #"a|b|c|d|e|h|l|pc|sp" %)))
+
+(def symbol->flags
+  (symbol->keywords #(.toCharArray %)))
 
 (def short-register-name->long-register-name
   {:z :zero
@@ -31,28 +39,28 @@
            `(bar.ops/load-from-registers-address-and-increment :a :h :l)
 
            [[true _] [false 'A]]
-           (let [[r1 r2] (symbol->keywords arg1)]
+           (let [[r1 r2] (symbol->registers arg1)]
              `(bar.ops/store-from-registers-address ~r1 ~r2))
 
            [[false _] [false 'd16]]
-           (let [[r1 r2] (symbol->keywords arg1)]
+           (let [[r1 r2] (symbol->registers arg1)]
              `(bar.ops/load-to-registers ~r1 ~r2))
 
            [[false _] [false 'd8]]
-           (let [[r] (symbol->keywords arg1)]
+           (let [[r] (symbol->registers arg1)]
              `(bar.ops/load-immediate-value ~r))
 
            [[true 'a16] [false 'SP]]
            `bar.ops/store-stack-pointer
 
            [[false _] [true _]]
-           (let [[r] (symbol->keywords arg1)
-                 [h l] (symbol->keywords arg2)]
+           (let [[r] (symbol->registers arg1)
+                 [h l] (symbol->registers arg2)]
              `(bar.ops/load-from-registers-address ~r ~h ~l)))))
 
 (defmacro INC
   [arg1]
-  (let [registers (symbol->keywords arg1)]
+  (let [registers (symbol->registers arg1)]
     (match (count registers)
            2
            (let [[r1 r2] registers]
@@ -64,7 +72,7 @@
 
 (defmacro DEC
   [arg1]
-  (let [registers (symbol->keywords arg1)]
+  (let [registers (symbol->registers arg1)]
     (match (count registers)
            2
            (let [[r1 r2] registers]
@@ -76,7 +84,7 @@
 
 (defmacro ADD
   [arg1 arg2]
-  (let [[h l] (symbol->keywords arg2)]
+  (let [[h l] (symbol->registers arg2)]
     `(bar.ops/add-register-words ~h ~l)))
 
 (defmacro JR
@@ -89,7 +97,7 @@
    (match [arg1 arg2]
           [_ 'r8]
           (let [required-flags (->> arg1
-                                    symbol->keywords
+                                    symbol->flags
                                     (map short-register-name->long-register-name)
                                     vec)]
             `(bar.ops/conditional-relative-jump ~required-flags)))))
