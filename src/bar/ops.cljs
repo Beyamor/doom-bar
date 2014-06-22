@@ -3,8 +3,8 @@
             [bar.memory :as memory]
             [bar.system :refer [read-next-byte set-registers store-in-memory read-register
                                 update-register set-flags read-registers read-register-address
-                                read-memory return set-register read-next-word get-address-in-registers
-                                update-word-in-registers ]]
+                                read-memory return set-register read-next-word read-register-word
+                                update-word-in-registers]]
             [bar.util :refer [truncate-byte bytes->word truncate-word word->bytes
                               word-half-carried? ->signed-byte int->bool bool->int in-range?]])
   (:require-macros [lonocloud.synthread :as ->]
@@ -37,14 +37,14 @@
   [h l]
   [2
    (m/do value    <- (read-register :a)
-         address  <- (get-address-in-registers h l)
+         address  <- (read-register-word h l)
          (store-in-memory address value))])
 
 (defn store-from-registers-address-and-update
   [h l update]
   [2
    (m/do value    <- (read-register :a)
-         address  <- (get-address-in-registers h l)
+         address  <- (read-register-word h l)
          (store-in-memory address value)
          (update-word-in-registers h l update))])
 
@@ -71,7 +71,7 @@
 
 (defn update-registers-address
   [h l update]
-  (m/do address  <- (get-address-in-registers h l)
+  (m/do address  <- (read-register-word h l)
         memory   <- read-memory
         :let [value (-> memory (memory/load address) update truncate-byte)]
         (store-in-memory address value)))
@@ -85,6 +85,18 @@
   [h l]
   [1
    (update-registers-address h l dec)]) 
+
+(defn update-register-word
+  [h l update]
+  (m/do value <- (read-register-word h l)
+        :let [[h-value l-value] (-> value update truncate-word word->bytes)]
+        (set-registers h h-value
+                       l l-value)))
+
+(defn increment-register-word
+  [h l]
+  [1
+   (update-register-word h l inc)])
 
 (defn increment-register
   [r]
@@ -186,20 +198,16 @@
 (def add-register-words
   (fn [hr2 lr2]
     [1
-     (m/do h1 <- (read-register :h)
-           l1 <- (read-register :l)
-           h2 <- (read-register hr2)
-           l2 <- (read-register lr2)
-           :let [value1           (bytes->word h1 l1)
-                 value2           (bytes->word h2 l2)
-                 result           (+ value1 value2)
-                 truncated-result (truncate-word result)
-                 [h l]            (word->bytes truncated-result)]
+     (m/do value1 <- (read-register-word :h :l)
+           value2 <- (read-register-word hr2 lr2)
+           :let [result           (+ value1 value2)
+                 truncate-result  (truncate-word result)
+                 [h l]            (word->bytes truncate-result)]
            (set-registers :h h
                           :l l)
            (set-flags :operation  false
                       :carry      (> result 0xffff)
-                      :half-carry (word-half-carried? value1 value2 truncated-result)))]))
+                      :half-carry (word-half-carried? value1 value2 truncate-result)))]))
 
 (def immediate-relative-jump
   [2

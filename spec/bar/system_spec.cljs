@@ -21,15 +21,6 @@
                              ((s/store-in-memory 1 2))
                              second :memory (memory/load 1)))))
 
-(describe "read-register-address "
-          (it "should read the address specified by some registers"
-              (should= 0x1234 (-> s/zeroed
-                                (->/in [:registers]
-                                       (assoc :a 0x12
-                                              :b 0x34))
-                                ((s/get-address-in-registers :a :b))
-                                first))))
-
 (describe "set-registers"
           (with registers (-> s/zeroed
                                 ((s/set-registers :a 0xab

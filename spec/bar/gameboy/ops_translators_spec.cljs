@@ -104,7 +104,7 @@
                                            :c 8))
                              (->/in [:memory]
                                     (memory/store 0x0908 1))
-                             (ops/execute (INC BC))
+                             (ops/execute (INC (BC)))
                              :memory
                              (memory/load 0x0908)))
               (should= 0 (-> system/zeroed
@@ -113,7 +113,7 @@
                                            :c 8))
                              (->/in [:memory]
                                     (memory/store 0x0908 0xff))
-                             (ops/execute (INC BC))
+                             (ops/execute (INC (BC)))
                              :memory
                              (memory/load 0x0908))))
 
@@ -134,7 +134,16 @@
                              (->/in [:registers]
                                     (assoc :sp 1))
                              (ops/execute (INC SP))
-                             :registers :sp))))
+                             :registers :sp)))
+
+          (let [registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :d 0x23 :e 0x5f))
+                              (ops/execute (INC DE))
+                              :registers)]
+            (it "should handle the increment-register-word form"
+                (should= 0x23 (registers :d))
+                (should= 0x60 (registers :e)))))
 
 (describe "DEC"
           (it "should handle the decrement-register form"

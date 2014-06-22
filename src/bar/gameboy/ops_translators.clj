@@ -59,16 +59,22 @@
              `(bar.ops/load-from-registers-address ~r ~h ~l)))))
 
 (defmacro INC
-  [arg1]
-  (let [registers (symbol->registers arg1)]
-    (match (count registers)
-           2
+  [arg]
+  (let [is-list?  (list? arg)
+        registers (symbol->registers
+                    (if is-list? (first arg) arg))]
+    (match [is-list? (count registers)]
+           [false 2]
            (let [[r1 r2] registers]
-             `(bar.ops/increment-registers-address ~r1 ~r2))
+             `(bar.ops/increment-register-word ~r1 ~r2))
 
-           1
+           [false 1]
            (let [[r] registers]
-             `(bar.ops/increment-register ~r)))))
+             `(bar.ops/increment-register ~r))
+
+           [true 2]
+           (let [[r1 r2] registers]
+             `(bar.ops/increment-registers/address ~r1 ~r2)))))
 
 (defmacro DEC
   [arg1]

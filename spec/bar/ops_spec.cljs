@@ -421,3 +421,13 @@
 
           (it "should set half-carry"
               (should (registers/flag-set? @registers :half-carry))))
+
+(describe "the increment-register-word"
+          (let [registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :d 0x23 :e 0x5f))
+                              (ops/execute (ops/increment-register-word :d :e))
+                              :registers)]
+            (it "should increment the word in the registers"
+                (should= 0x23 (registers :d))
+                (should= 0x60 (registers :e)))))
