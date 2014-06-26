@@ -165,7 +165,7 @@
                                            :c 8))
                              (->/in [:memory]
                                     (memory/store 0x0908 2))
-                             (ops/execute (DEC BC))
+                             (ops/execute (DEC (BC)))
                              :memory
                              (memory/load 0x0908)))
               (should= 0xff (-> system/zeroed
@@ -174,9 +174,19 @@
                                            :c 8))
                              (->/in [:memory]
                                     (memory/store 0x0908 0))
-                             (ops/execute (DEC BC))
+                             (ops/execute (DEC (BC)))
                              :memory
-                             (memory/load 0x0908)))))
+                             (memory/load 0x0908))))
+
+          (it "should handle the decrement-registers-word form"
+              (let [registers (-> system/zeroed
+                                  (->/in [:registers]
+                                         (assoc :d 0x23 :e 0x5f))
+                                  (ops/execute (DEC DE))
+                                  :registers)]
+                (it "should decrement the word in the registers"
+                    (should= 0x23 (registers :d))
+                    (should= 0x5e (registers :e))))))
 
 (describe "ADD"
           (with registers (-> system/zeroed

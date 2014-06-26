@@ -98,6 +98,11 @@
   [1
    (update-register-word h l inc)])
 
+(defn decrement-register-word
+  [h l]
+  [1
+   (update-register-word h l dec)])
+
 (defn increment-register
   [r]
   [1
