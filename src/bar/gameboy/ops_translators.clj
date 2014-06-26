@@ -74,7 +74,7 @@
 
            [true 2]
            (let [[r1 r2] registers]
-             `(bar.ops/increment-registers/address ~r1 ~r2)))))
+             `(bar.ops/increment-registers-address ~r1 ~r2)))))
 
 (defmacro DEC
   [arg1]
