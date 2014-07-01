@@ -441,3 +441,14 @@
             (it "should decrement the word in the registers"
                 (should= 0x23 (registers :d))
                 (should= 0x5e (registers :e)))))
+
+(describe "the store-immediate-value-to-register-address instruction"
+          (it "should store the immediate value in the address"
+              (should= 0x12 (-> system/zeroed
+                                (->/in [:registers]
+                                       (assoc :h 0x8a :l 0xc5))
+                                (->/in [:memory]
+                                       (memory/store 0 0x12))
+                                (ops/execute (ops/store-immediate-value-to-register-address :h :l))
+                                :memory
+                                (memory/load 0x8ac5)))))

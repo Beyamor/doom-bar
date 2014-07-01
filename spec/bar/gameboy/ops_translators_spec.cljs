@@ -93,8 +93,17 @@
             (it "should handle the load-from-registers-address-and-increment form"
                 (should= 0x56 (-> system :registers :a))
                 (should= 0x02 (-> system :registers :h))
-                (should= 0x00 (-> system :registers :l)))))
+                (should= 0x00 (-> system :registers :l))))
 
+          (it "should handle the store-immediate-value-to-register-address form"
+              (should= 0x12 (-> system/zeroed
+                                (->/in [:registers]
+                                       (assoc :h 0x8a :l 0xc5))
+                                (->/in [:memory]
+                                       (memory/store 0 0x12))
+                                (ops/execute (LD (HL), d8))
+                                :memory
+                                (memory/load 0x8ac5)))))
 
 (describe "INC"
           (it "should handle the increment-registers-address form"

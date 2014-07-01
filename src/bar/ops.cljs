@@ -272,3 +272,10 @@
    (m/do (update-register :a bit-xor 0xff)
          (set-flags :half-carry true
                     :operation  true))])
+
+(defn store-immediate-value-to-register-address 
+  [h l]
+  [2
+   (m/do value    <- read-next-byte
+         address  <- (read-register-word h l)
+         (store-in-memory address value))])
