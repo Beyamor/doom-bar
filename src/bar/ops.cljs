@@ -279,3 +279,9 @@
    (m/do value    <- read-next-byte
          address  <- (read-register-word h l)
          (store-in-memory address value))])
+
+(def set-carry-flag
+  [1
+   (set-flags :carry      true
+              :half-carry false
+              :operation  false)])

@@ -452,3 +452,23 @@
                                 (ops/execute (ops/store-immediate-value-to-register-address :h :l))
                                 :memory
                                 (memory/load 0x8ac5)))))
+
+(describe "the set-carry-flag instruction"
+          (with registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (registers/set-flags :carry      false
+                                                          :half-carry true
+                                                          :operation  true
+                                                          :zero       true))
+                              (ops/execute ops/set-carry-flag)
+                              :registers))
+
+          (it "should set the carry flag"
+              (should (registers/flag-set? @registers :carry)))
+
+          (it "should unset the half-carry and operation flags"
+              (should-not (registers/flag-set? @registers :half-carry))
+              (should-not (registers/flag-set? @registers :operation)))
+
+          (it "should leave the zero flag unchanged"
+              (should (registers/flag-set? @registers :zero))))
