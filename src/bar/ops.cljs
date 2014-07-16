@@ -62,12 +62,19 @@
    (m/do value <- (read-register-address h l)
          (set-register r value))])
 
-(defn load-from-registers-address-and-increment
-  [r h l]
-  [1
-   (m/do value <- (read-register-address h l)
-         (set-register r value)
-         (update-word-in-registers h l inc))])
+(defn load-from-registers-address-and-update
+  [f]
+  (fn [r h l]
+    [1
+     (m/do value <- (read-register-address h l)
+           (set-register r value)
+           (update-word-in-registers h l f))]))
+
+(def load-from-registers-address-and-increment
+  (load-from-registers-address-and-update inc))
+
+(def load-from-registers-address-and-decrement
+  (load-from-registers-address-and-update dec))
 
 (defn update-registers-address
   [h l update]

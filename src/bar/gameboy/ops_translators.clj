@@ -38,6 +38,9 @@
            [[false 'A] [true 'HL+]]
            `(bar.ops/load-from-registers-address-and-increment :a :h :l)
 
+           [[false 'A] [true 'HL-]]
+           `(bar.ops/load-from-registers-address-and-decrement :a :h :l)
+
            [[true _] [false 'A]]
            (let [[r1 r2] (symbol->registers arg1)]
              `(bar.ops/store-from-registers-address ~r1 ~r2))

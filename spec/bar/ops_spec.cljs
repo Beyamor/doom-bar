@@ -348,6 +348,20 @@
               (should= 0x02 (-> @system :registers :h))
               (should= 0x00 (-> @system :registers :l))))
 
+(describe "a load-from-registers-address-and-decrement"
+          (with system (-> system/zeroed
+                           (->/in [:memory]
+                                  (memory/store 0x8a5c 0x3c))
+                           (->/in [:registers]
+                                  (assoc :h 0x8a
+                                         :l 0x5c))
+                           (ops/execute (ops/load-from-registers-address-and-decrement :a :h :l))))
+          (it "should load a value from memory"
+              (should= 0x3c (-> @system :registers :a)))
+          (it "should decrement the register values"
+              (should= 0x8a (-> @system :registers :h))
+              (should= 0x5b (-> @system :registers :l))))
+
 (describe "the immediate-relative-jump instruction"
           (let [jump (fn [starting-address offset]
                        (-> system/zeroed

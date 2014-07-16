@@ -95,6 +95,18 @@
                 (should= 0x02 (-> system :registers :h))
                 (should= 0x00 (-> system :registers :l))))
 
+          (let [system (-> system/zeroed
+                           (->/in [:memory]
+                                  (memory/store 0x8a5c 0x3c))
+                           (->/in [:registers]
+                                  (assoc :h 0x8a
+                                         :l 0x5c))
+                           (ops/execute (LD A, (HL-))))]
+            (it "should handle the load-from-registers-address-and-decrement form"
+                (should= 0x3c (-> system :registers :a))
+                (should= 0x8a (-> system :registers :h))
+                (should= 0x5b (-> system :registers :l))))
+
           (it "should handle the store-immediate-value-to-register-address form"
               (should= 0x12 (-> system/zeroed
                                 (->/in [:registers]
