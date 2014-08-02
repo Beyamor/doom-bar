@@ -486,3 +486,32 @@
 
           (it "should leave the zero flag unchanged"
               (should (registers/flag-set? @registers :zero))))
+
+(describe "the complement-carry-flag"
+          (with carry-set-registers (-> system/zeroed
+                                        (->/in [:registers]
+                                               (registers/set-flags :carry      false
+                                                                    :operation  true
+                                                                    :half-carry true))
+                                        (ops/execute ops/complement-carry-flag)
+                                        :registers))
+
+          (with carry-unset-registers (-> system/zeroed
+                                          (->/in [:registers]
+                                                 (registers/set-flags :carry      true
+                                                                      :operation  true
+                                                                      :half-carry true))
+                                          (ops/execute ops/complement-carry-flag)
+                                          :registers))
+
+          (it "should set an unset flag"
+              (should (registers/flag-set? @carry-set-registers :carry)))
+
+          (it "should unset a set flag"
+              (should-not (registers/flag-set? @carry-unset-registers :carry)))
+
+          (it "should unset the half-carry and operation flags"
+              (should-not (registers/flag-set? @carry-set-registers :half-carry))
+              (should-not (registers/flag-set? @carry-set-registers :operation))
+              (should-not (registers/flag-set? @carry-unset-registers :half-carry))
+              (should-not (registers/flag-set? @carry-unset-registers :operation))))

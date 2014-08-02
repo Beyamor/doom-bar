@@ -292,3 +292,11 @@
    (set-flags :carry      true
               :half-carry false
               :operation  false)])
+
+(def complement-carry-flag
+  [1
+   (m/do registers <- read-registers
+         :let [carry? (registers/flag-set? registers :carry)]
+         (set-flags :carry      (not carry?)
+                    :half-carry false
+                    :operation  false))])
