@@ -115,7 +115,15 @@
                                        (memory/store 0 0x12))
                                 (ops/execute (LD (HL), d8))
                                 :memory
-                                (memory/load 0x8ac5)))))
+                                (memory/load 0x8ac5))))
+
+          (it "should handle the load-register-into-register form"
+              (should= 0xb (-> system/zeroed
+                                (->/in [:registers]
+                                       (assoc :a 0xa :b 0xb))
+                                (ops/execute (LD A, B))
+                                :registers
+                                :a))))
 
 (describe "INC"
           (it "should handle the increment-registers-address form"
@@ -190,14 +198,14 @@
                              :memory
                              (memory/load 0x0908)))
               (should= 0xff (-> system/zeroed
-                             (->/in [:registers]
-                                    (assoc :b 9
-                                           :c 8))
-                             (->/in [:memory]
-                                    (memory/store 0x0908 0))
-                             (ops/execute (DEC (BC)))
-                             :memory
-                             (memory/load 0x0908))))
+                                (->/in [:registers]
+                                       (assoc :b 9
+                                              :c 8))
+                                (->/in [:memory]
+                                       (memory/store 0x0908 0))
+                                (ops/execute (DEC (BC)))
+                                :memory
+                                (memory/load 0x0908))))
 
           (it "should handle the decrement-registers-word form"
               (let [registers (-> system/zeroed

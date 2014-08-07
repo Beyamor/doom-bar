@@ -515,3 +515,12 @@
               (should-not (registers/flag-set? @carry-set-registers :operation))
               (should-not (registers/flag-set? @carry-unset-registers :half-carry))
               (should-not (registers/flag-set? @carry-unset-registers :operation))))
+
+(describe "the load-register-into-register instruction"
+          (it "should load the contents of r' into r"
+              (should= 0xb (-> system/zeroed
+                               (->/in [:registers]
+                                      (assoc :a 0xa :b 0xb))
+                               (ops/execute (ops/load-register-into-register :b :a))
+                               :registers
+                               :a))))

@@ -62,7 +62,12 @@
              `(bar.ops/load-from-registers-address ~r ~h ~l))
            
            [[true 'HL] [false 'd8]]
-           `(bar.ops/store-immediate-value-to-register-address :h :l))))
+           `(bar.ops/store-immediate-value-to-register-address :h :l)
+           
+           [[false dest] [false source]]
+           (let [[dest] (symbol->registers dest)
+                 [source] (symbol->registers source)]
+             `(bar.ops/load-register-into-register ~source ~dest)))))
 
 (defmacro INC
   [arg]

@@ -300,3 +300,9 @@
          (set-flags :carry      (not carry?)
                     :half-carry false
                     :operation  false))])
+
+(defn load-register-into-register
+  [source dest]
+  [1
+   (m/do source-value <- (read-register source)
+         (set-register dest source-value))])
