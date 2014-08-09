@@ -41,10 +41,6 @@
            [[false 'A] [true 'HL-]]
            `(bar.ops/load-from-registers-address-and-decrement :a :h :l)
 
-           [[true _] [false 'A]]
-           (let [[r1 r2] (symbol->registers arg1)]
-             `(bar.ops/store-from-registers-address ~r1 ~r2))
-
            [[false _] [false 'd16]]
            (let [[r1 r2] (symbol->registers arg1)]
              `(bar.ops/load-to-registers ~r1 ~r2))
@@ -63,6 +59,11 @@
            
            [[true 'HL] [false 'd8]]
            `(bar.ops/store-immediate-value-to-register-address :h :l)
+
+           [[true _] [false _]]
+           (let [[source] (symbol->registers arg2)
+                 [h l] (symbol->registers arg1)]
+             `(bar.ops/store-from-registers-address ~source ~h ~l))
            
            [[false dest] [false source]]
            (let [[dest] (symbol->registers dest)

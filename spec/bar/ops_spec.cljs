@@ -42,7 +42,7 @@
                                      (assoc :a 23
                                             :b 9
                                             :c 8))
-                              (ops/execute (ops/store-from-registers-address :b :c))
+                              (ops/execute (ops/store-from-registers-address :a :b :c))
                               :memory
                               (memory/load 0x0908)))))
 

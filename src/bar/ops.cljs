@@ -34,9 +34,9 @@
                         r2 byte2))])
 
 (defn store-from-registers-address
-  [h l]
+  [source h l]
   [2
-   (m/do value    <- (read-register :a)
+   (m/do value    <- (read-register source)
          address  <- (read-register-word h l)
          (store-in-memory address value))])
 
