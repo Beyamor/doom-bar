@@ -144,7 +144,16 @@
    (LD (HL), E)
    (LD (HL), H)
    (LD (HL), L)
-   HALT])
+   HALT
+   (LD (HL), A)
+   (LD A, B)
+   (LD A, C)
+   (LD A, D)
+   (LD A, E)
+   (LD A, H)
+   (LD A, L)
+   (LD A, (HL))
+   (LD A, A)])
 
 (def bios
   [0x31 0xFE 0xFF 0xAF 0x21 0xFF 0x9F 0x32 0xCB 0x7C 0x20 0xFB 0x21 0x26 0xFF 0x0E
