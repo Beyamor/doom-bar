@@ -17,10 +17,12 @@
       second
       (assoc-in [:registers :m] m)))
 
-(def unimplemented-op
+(defn unimplemented-op
+  [name]
   [0
    (fn [_]
-     (throw (js/Error. "Unimplemented op")))])
+     (throw (js/Error.
+              (str name " not implemented"))))])
 
 (def no-op
   [1 (return nil)])

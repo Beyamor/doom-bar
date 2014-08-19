@@ -7,11 +7,12 @@
 (def RLA bar.ops/rla)
 (def RRCA bar.ops/rrca)
 (def RRA bar.ops/rra)
-(def STOP [0 (fn [& _] (throw "STOP not implemented"))])
+(def STOP (bar.ops/unimplemented-op "STOP"))
 (def DAA bar.ops/daa)
 (def CPL bar.ops/ones-complement)
 (def SCF bar.ops/set-carry-flag)
 (def CCF bar.ops/complement-carry-flag)
+(def HALT (bar.ops/unimplemented-op "HALT"))
 
 (def ops
   [; 0x0
@@ -142,7 +143,8 @@
    (LD (HL), D)
    (LD (HL), E)
    (LD (HL), H)
-   (LD (HL), L)])
+   (LD (HL), L)
+   HALT])
 
 (def bios
   [0x31 0xFE 0xFF 0xAF 0x21 0xFF 0x9F 0x32 0xCB 0x7C 0x20 0xFB 0x21 0x26 0xFF 0x0E
