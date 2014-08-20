@@ -308,3 +308,13 @@
   [1
    (m/do source-value <- (read-register source)
          (set-register dest source-value))])
+
+(defn add-registers
+  [a b]
+  [1
+   (m/do b-value <- (read-register b)
+         {:keys [zero? carried? half-carried?]} <- (update-register a + b-value)
+         (set-flags :zero       zero?
+                    :carry      carried?
+                    :half-carry half-carried?
+                    :operation  false))])

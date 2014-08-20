@@ -524,3 +524,21 @@
                                (ops/execute (ops/load-register-into-register :b :a))
                                :registers
                                :a))))
+
+(describe "the add-registers instruction"
+          (with registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :a 0x3a :b 0xc6)
+                                     (registers/set-flag :operation))
+                              (ops/execute (ops/add-registers :a :b))
+                              :registers))
+          (it "should add the values and store them in the first register"
+              (should= 0 (@registers :a)))
+
+          (it "should set the zero, carry, and half-carry flags"
+              (should (registers/flag-set? @registers :zero))
+              (should (registers/flag-set? @registers :carry))
+              (should (registers/flag-set? @registers :half-carry)))
+
+          (it "should unset the operation flag"
+             (should-not (registers/flag-set? @registers :operation)))) 
