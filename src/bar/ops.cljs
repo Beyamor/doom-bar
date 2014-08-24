@@ -209,19 +209,29 @@
          (set-flags :operation  true
                     :carry      carried?))])
 
-(def add-register-words
-  (fn [hr2 lr2]
-    [1
-     (m/do value1 <- (read-register-word :h :l)
-           value2 <- (read-register-word hr2 lr2)
-           :let [result           (+ value1 value2)
-                 truncate-result  (truncate-word result)
-                 [h l]            (word->bytes truncate-result)]
-           (set-registers :h h
-                          :l l)
-           (set-flags :operation  false
-                      :carry      (> result 0xffff)
-                      :half-carry (word-half-carried? value1 value2 truncate-result)))]))
+(defn add-word-to-register-word
+  [h l added-value]
+  (m/do value <- (read-register-word h l)
+        :let [result           (+ value added-value)
+              truncate-result  (truncate-word result)
+              [h l]            (word->bytes truncate-result)]
+        (set-registers :h h
+                       :l l)
+        (set-flags :operation  false
+                   :carry      (> result 0xffff)
+                   :half-carry (word-half-carried? value added-value truncate-result))))
+
+(defn add-register-words
+  [h1 l1 h2 l2]
+  [1
+   (m/do added-value <- (read-register-word h2 l2)
+         (add-word-to-register-word h1 l1 added-value))])
+
+(defn add-sp-to-register-word
+  [h l]
+  [1
+   (m/do added-value <- (read-register-word :sp)
+         (add-word-to-register-word h l added-value))])
 
 (def immediate-relative-jump
   [2

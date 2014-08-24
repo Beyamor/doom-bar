@@ -218,7 +218,7 @@
                     (should= 0x5e (registers :e))))))
 
 (describe "ADD"
-          (with registers (-> system/zeroed
+          (let [registers (-> system/zeroed
                               (->/in [:registers]
                                      (assoc :h 0x8a
                                             :l 0x23
@@ -226,10 +226,23 @@
                                             :c 0x05)
                                      (registers/unset-flag :operation))
                               (ops/execute (ADD HL, BC))
-                              :registers))
-          (it "should handle the add-register-words form"
-              (should= 0x90 (@registers :h))
-              (should= 0x28 (@registers :l))))
+                              :registers)]
+            (it "should handle the add-register-words form"
+                (should= 0x90 (registers :h))
+                (should= 0x28 (registers :l))))
+
+          (let [registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :a 0x3a :b 0xc6)
+                                     (registers/set-flag :operation))
+                              (ops/execute (ADD A, B))
+                              :registers)]
+            (it "should handle the add-registers form"
+                (should= 0 (registers :a))
+                (should (registers/flag-set? registers :zero))
+                (should (registers/flag-set? registers :carry))
+                (should (registers/flag-set? registers :half-carry))
+                (should-not (registers/flag-set? registers :operation)))))
 
 (describe "JR"
           (let [jump (fn [starting-address offset]

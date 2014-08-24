@@ -8,7 +8,8 @@
          name
          .toLowerCase
          split
-         (map #(-> % str keyword)))))
+         (map #(-> % str keyword))
+         vec)))
 
 (def symbol->registers
   (symbol->keywords #(re-seq #"a|b|c|d|e|h|l|pc|sp" %)))
@@ -108,8 +109,25 @@
 
 (defmacro ADD
   [arg1 arg2]
-  (let [[h l] (symbol->registers arg2)]
-    `(bar.ops/add-register-words ~h ~l)))
+  (let [registers1 (symbol->registers arg1)
+        registers2 (symbol->registers arg2)]
+    (spit "/tmp/huh" (str (vec registers1)
+                          \newline
+                          (vec registers2)))
+    (match [registers1 registers2]
+           [[_ _] [_ _]]
+           (let [[h1 l1] registers1
+                 [h2 l2] registers2]
+             `(bar.ops/add-register-words ~h1 ~l1 ~h2 ~l2))
+
+           [[_ _] [:sp]]
+           (let [[h l] registers1]
+             `(bar.ops/add-sp-to-register-word ~h ~l))
+
+           [[_] [_]]
+           (let [[a] registers1
+                 [b] registers2]
+             `(bar.ops/add-registers ~a ~b)))))
 
 (defmacro JR
   ([arg]

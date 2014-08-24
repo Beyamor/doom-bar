@@ -72,10 +72,13 @@
   (update-in [:memory] memory/store address value))
 
 (defn read-register-word 
-  [h l]
-  (m/do h <- (read-register h)
-        l <- (read-register l)
-        (return (bytes->word h l))))
+  ([r]
+   (m/do addr <- (read-register r)
+         (return addr)))
+  ([h l]
+   (m/do h <- (read-register h)
+         l <- (read-register l)
+         (return (bytes->word h l)))))
 
 (defn read-memory-at
   [address]

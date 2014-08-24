@@ -298,7 +298,7 @@
                                             :b 0x06
                                             :c 0x05)
                                      (registers/unset-flag :operation))
-                              (ops/execute (ops/add-register-words :b :c))
+                              (ops/execute (ops/add-register-words :h :l :b :c))
                               :registers))
           (it "should add the values"
               (should= 0x90 (@registers :h))
@@ -313,7 +313,7 @@
                                      (assoc :h 0x8a
                                             :l 0x23)
                                      (registers/unset-flag :operation))
-                              (ops/execute (ops/add-register-words :h :l))
+                              (ops/execute (ops/add-register-words :h :l :h :l))
                               :registers))
           (it "should add the values"
               (should= 0x14 (@registers2 :h))

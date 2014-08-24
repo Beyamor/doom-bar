@@ -58,7 +58,7 @@
    (LD H, d8)
    DAA
    (JR Z, r8)
-   (ADD HL, SP)
+   (ADD HL, HL)
    (LD A, (HL+))
    (DEC HL)
    (INC L)
