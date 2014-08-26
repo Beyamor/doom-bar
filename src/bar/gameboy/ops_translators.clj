@@ -55,6 +55,9 @@
            [[false [r1 r2]] [false ['d16]]]
            `(bar.ops/load-to-registers ~r1 ~r2)
 
+           [[false [r]] [false ['d16]]]
+           `(bar.ops/load-to-register ~r)
+
            [[false [r]] [false ['d8]]]
            `(bar.ops/load-immediate-value ~r)
 

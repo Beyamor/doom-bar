@@ -35,6 +35,12 @@
          (set-registers r1 byte1
                         r2 byte2))])
 
+(defn load-to-register
+  [r]
+  [3
+   (m/do word <- read-next-word
+         (set-register r word))])
+
 (defn store-from-registers-address
   [source h l]
   [2
