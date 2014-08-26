@@ -242,6 +242,23 @@
                 (should (registers/flag-set? registers :zero))
                 (should (registers/flag-set? registers :carry))
                 (should (registers/flag-set? registers :half-carry))
+                (should-not (registers/flag-set? registers :operation))))
+
+          (let [registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :a 0x3a
+                                            :h 0x09
+                                            :l 0x08)
+                                     (registers/set-flag :operation))
+                              (->/in [:memory]
+                                     (memory/store 0x0908 0xc6))
+                              (ops/execute (ADD A, (HL)))
+                              :registers)]
+            (it "should handle the add-from-registers-address instruction"
+                (should= 0 (registers :a))
+                (should (registers/flag-set? registers :zero))
+                (should (registers/flag-set? registers :carry))
+                (should (registers/flag-set? registers :half-carry))
                 (should-not (registers/flag-set? registers :operation)))))
 
 (describe "JR"

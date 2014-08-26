@@ -17,6 +17,18 @@
 (def symbol->flags
   (symbol->keywords #(.toCharArray %)))
 
+(defn symbol->args
+  [arg]
+  (if (#{'d8 'd16 'a16 'HL+ 'HL-} arg)
+    [arg]
+    (symbol->registers arg)))
+
+(defn list?-and-args
+  [arg]
+  (let [is-list? (sequential? arg)]
+    [is-list? (symbol->args
+                (if is-list? (first arg) arg))]))
+
 (def short-register-name->long-register-name
   {:z :zero
    :n :operation
@@ -25,57 +37,45 @@
 
 (defmacro LD
   [arg1 arg2]
-  (let [arg1-is-list? (list? arg1)
-        arg1          (if arg1-is-list? (first arg1) arg1)
-        arg2-is-list? (list? arg2)
-        arg2          (if arg2-is-list? (first arg2) arg2)]
+  (let [[arg1-is-list? arg1] (list?-and-args arg1)
+        [arg2-is-list? arg2] (list?-and-args arg2)]
     (match [[arg1-is-list? arg1] [arg2-is-list? arg2]]
-           [[true 'HL+] [false 'A]]
+           [[true ['HL+]] [false [:a]]]
            `(bar.ops/store-from-registers-address-and-increment :h :l)
 
-           [[true 'HL-] [false 'A]]
+           [[true ['HL-]] [false [:a]]]
            `(bar.ops/store-from-registers-address-and-decrement :h :l)
 
-           [[false 'A] [true 'HL+]]
+           [[false [:a]] [true ['HL+]]]
            `(bar.ops/load-from-registers-address-and-increment :a :h :l)
 
-           [[false 'A] [true 'HL-]]
+           [[false [:a]] [true ['HL-]]]
            `(bar.ops/load-from-registers-address-and-decrement :a :h :l)
 
-           [[false _] [false 'd16]]
-           (let [[r1 r2] (symbol->registers arg1)]
-             `(bar.ops/load-to-registers ~r1 ~r2))
+           [[false [r1 r2]] [false ['d16]]]
+           `(bar.ops/load-to-registers ~r1 ~r2)
 
-           [[false _] [false 'd8]]
-           (let [[r] (symbol->registers arg1)]
-             `(bar.ops/load-immediate-value ~r))
+           [[false [r]] [false ['d8]]]
+           `(bar.ops/load-immediate-value ~r)
 
-           [[true 'a16] [false 'SP]]
+           [[true ['a16]] [false [:sp]]]
            `bar.ops/store-stack-pointer
 
-           [[false _] [true _]]
-           (let [[r] (symbol->registers arg1)
-                 [h l] (symbol->registers arg2)]
-             `(bar.ops/load-from-registers-address ~r ~h ~l))
-           
-           [[true 'HL] [false 'd8]]
+           [[false [r]] [true [h l]]]
+           `(bar.ops/load-from-registers-address ~r ~h ~l)
+
+           [[true [:h :l]] [false ['d8]]]
            `(bar.ops/store-immediate-value-to-register-address :h :l)
 
-           [[true _] [false _]]
-           (let [[source] (symbol->registers arg2)
-                 [h l] (symbol->registers arg1)]
-             `(bar.ops/store-from-registers-address ~source ~h ~l))
-           
-           [[false dest] [false source]]
-           (let [[dest] (symbol->registers dest)
-                 [source] (symbol->registers source)]
-             `(bar.ops/load-register-into-register ~source ~dest)))))
+           [[true [h l]] [false [source]]]
+           `(bar.ops/store-from-registers-address ~source ~h ~l)
+
+           [[false [dest]] [false [source]]]
+           `(bar.ops/load-register-into-register ~source ~dest))))
 
 (defmacro INC
   [arg]
-  (let [is-list?  (list? arg)
-        registers (symbol->registers
-                    (if is-list? (first arg) arg))]
+  (let [[is-list? registers] (list?-and-args arg)]
     (match [is-list? (count registers)]
            [false 2]
            (let [[r1 r2] registers]
@@ -91,9 +91,7 @@
 
 (defmacro DEC
   [arg]
-  (let [is-list?  (list? arg)
-        registers (symbol->registers
-                    (if is-list? (first arg) arg))]
+  (let [[is-list? registers] (list?-and-args arg)]
     (match [is-list? (count registers)]
            [false 2]
            (let [[r1 r2] registers]
@@ -109,25 +107,20 @@
 
 (defmacro ADD
   [arg1 arg2]
-  (let [registers1 (symbol->registers arg1)
-        registers2 (symbol->registers arg2)]
-    (spit "/tmp/huh" (str (vec registers1)
-                          \newline
-                          (vec registers2)))
-    (match [registers1 registers2]
-           [[_ _] [_ _]]
-           (let [[h1 l1] registers1
-                 [h2 l2] registers2]
-             `(bar.ops/add-register-words ~h1 ~l1 ~h2 ~l2))
+  (let [[arg1-is-list? registers1] (list?-and-args arg1)
+        [arg2-is-list? registers2] (list?-and-args arg2)]
+    (match [[arg1-is-list? registers1] [arg2-is-list? registers2]]
+           [[false [h1 l1]] [false [h2 l2]]]
+           `(bar.ops/add-register-words ~h1 ~l1 ~h2 ~l2)
 
-           [[_ _] [:sp]]
-           (let [[h l] registers1]
-             `(bar.ops/add-sp-to-register-word ~h ~l))
+           [[false [h l]] [false [:sp]]]
+           `(bar.ops/add-sp-to-register-word ~h ~l)
 
-           [[_] [_]]
-           (let [[a] registers1
-                 [b] registers2]
-             `(bar.ops/add-registers ~a ~b)))))
+           [[false [a]] [false [b]]]
+           `(bar.ops/add-registers ~a ~b)
+
+           [[false [r]] [true [h l]]]
+           `(bar.ops/add-from-registers-address ~r ~h ~l))))
 
 (defmacro JR
   ([arg]
