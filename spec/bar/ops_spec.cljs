@@ -542,3 +542,26 @@
 
           (it "should unset the operation flag"
              (should-not (registers/flag-set? @registers :operation)))) 
+
+(describe "the add-from-registers-address instruction"
+          (with registers (-> system/zeroed
+                              (->/in [:registers]
+                                     (assoc :a 0x3a
+                                            :h 0x09
+                                            :l 0x08)
+                                     (registers/set-flag :operation))
+                              (->/in [:memory]
+                                     (memory/store 0x0908 0xc6))
+                              (ops/execute (ops/add-from-registers-address :a :h :l))
+                              :registers))
+
+          (it "should add the values and store them in the destination register"
+              (should= 0 (@registers :a)))
+
+          (it "should set the zero, carry, and half-carry flags"
+              (should (registers/flag-set? @registers :zero))
+              (should (registers/flag-set? @registers :carry))
+              (should (registers/flag-set? @registers :half-carry)))
+
+          (it "should unset the operation flag"
+             (should-not (registers/flag-set? @registers :operation))))

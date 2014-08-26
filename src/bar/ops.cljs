@@ -328,3 +328,13 @@
                     :carry      carried?
                     :half-carry half-carried?
                     :operation  false))])
+
+(defn add-from-registers-address 
+  [r h l]
+  [1
+   (m/do added-value <- (read-register-address  h l)
+         {:keys [zero? carried? half-carried?]} <- (update-register r + added-value)
+         (set-flags :zero        zero?
+                    :carry       carried?
+                    :half-carry  half-carried?
+                    :operation   false))])
