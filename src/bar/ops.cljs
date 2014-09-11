@@ -199,14 +199,6 @@
          (store-in-memory address (-> sp truncate-byte))
          (store-in-memory (inc address) (-> sp (bit-shift-right 8) truncate-byte)))])
 
-(def add-registers
-  (fn [r1 r2]
-    [1
-     (m/do r2-value <- (read-register r2)
-           {:keys [carried?]} <- (update-register r1 + r2-value)
-           (set-flags :operation  false
-                      :carry      carried?))]))
-
 (defn subtract-registers
   [r1 r2]
   [1
@@ -330,6 +322,18 @@
   [1
    (m/do b-value <- (read-register b)
          {:keys [zero? carried? half-carried?]} <- (update-register a + b-value)
+         (set-flags :zero       zero?
+                    :carry      carried?
+                    :half-carry half-carried?
+                    :operation  false))])
+
+(defn add-registers-and-carry
+  [a b]
+  [1
+   (m/do b-value <- (read-register b)
+         registers <- read-registers
+         :let [carry-value (if (registers/flag-set? registers :carry) 1 0)]
+         {:keys [zero? carried? half-carried?]} <- (update-register a + b-value carry-value)
          (set-flags :zero       zero?
                     :carry      carried?
                     :half-carry half-carried?
