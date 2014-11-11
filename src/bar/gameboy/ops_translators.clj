@@ -139,3 +139,11 @@
                                     (map short-register-name->long-register-name)
                                     vec)]
             `(bar.ops/conditional-relative-jump ~required-flags)))))
+
+(defmacro ADC
+  [arg1 arg2]
+  (let [[arg1-is-list? registers1] (list?-and-args arg1)
+        [arg2-is-list? registers2] (list?-and-args arg2)]
+    (match [[arg1-is-list? registers1] [arg2-is-list? registers2]]
+           [[false [a]] [false [b]]]
+           `(bar.ops/add-registers-and-carry ~a ~b))))

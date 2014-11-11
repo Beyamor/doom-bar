@@ -1,7 +1,7 @@
 (ns bar.gameboy.ops-translators-spec
   (:require-macros [speclj.core :refer [describe it should= should should-not should-throw with]]
                    [lonocloud.synthread :as ->]
-                   [bar.gameboy.ops-translators :refer [LD INC DEC ADD JR]])
+                   [bar.gameboy.ops-translators :refer [LD INC DEC ADD JR ADC]])
   (:require [speclj.core]
             [clojure.data :as data]
             [bar.registers :as registers]
@@ -294,3 +294,18 @@
                 (should= 151 (jump 150 -50 [:zero] []))
                 (should= 0x100 (jump 0xff 50 [:zero] []))
                 (should= 1 (jump 0 -50 [:zero] [])))))
+
+(describe "ADC"
+          (it "should handle the add-registers-and-carry form"
+              (let [registers (-> system/zeroed
+                                  (->/in [:registers]
+                                         (assoc :a 0x3a :b 0xc5)
+                                         (registers/set-flags :carry      true
+                                                              :operation  true))
+                                  (ops/execute (ADC A, B))
+                                  :registers)]
+                (should= 0 (registers :a))
+                (should (registers/flag-set? registers :zero))
+                (should (registers/flag-set? registers :carry))
+                (should (registers/flag-set? registers :half-carry))
+                (should-not (registers/flag-set? registers :operation)))))
