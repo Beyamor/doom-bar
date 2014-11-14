@@ -348,3 +348,15 @@
                     :carry       carried?
                     :half-carry  half-carried?
                     :operation   false))])
+
+(defn add-from-registers-address-and-carry
+  [r h l]
+  [1
+   (m/do added-value <- (read-register-address h l)
+         registers <- read-registers
+         :let [carry-value (if (registers/flag-set? registers :carry) 1 0)]
+         {:keys [zero? carried? half-carried?]} <- (update-register r + added-value carry-value)
+         (set-flags :zero       zero?
+                    :carry      carried?
+                    :half-carry half-carried?
+                    :operation  false))])
