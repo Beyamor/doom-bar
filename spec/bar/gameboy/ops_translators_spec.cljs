@@ -308,4 +308,22 @@
                 (should (registers/flag-set? registers :zero))
                 (should (registers/flag-set? registers :carry))
                 (should (registers/flag-set? registers :half-carry))
+                (should-not (registers/flag-set? registers :operation))))
+
+          (it "should handle the add-from-registers-address-and-carry form"
+              (let [registers (-> system/zeroed
+                                  (->/in [:registers]
+                                         (assoc :a 0x3a
+                                                :h 0x09
+                                                :l 0x08)
+                                         (registers/set-flag :operation)
+                                         (registers/set-flag :carry))
+                                  (->/in [:memory]
+                                         (memory/store 0x0908 0xc5))
+                                  (ops/execute (ADC A, (HL)))
+                                  :registers)]
+                (should= 0 (registers :a))
+                (should (registers/flag-set? registers :zero))
+                (should (registers/flag-set? registers :carry))
+                (should (registers/flag-set? registers :half-carry))
                 (should-not (registers/flag-set? registers :operation)))))

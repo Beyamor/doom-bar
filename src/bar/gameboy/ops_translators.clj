@@ -146,4 +146,7 @@
         [arg2-is-list? registers2] (list?-and-args arg2)]
     (match [[arg1-is-list? registers1] [arg2-is-list? registers2]]
            [[false [a]] [false [b]]]
-           `(bar.ops/add-registers-and-carry ~a ~b))))
+           `(bar.ops/add-registers-and-carry ~a ~b)
+
+           [[false [r]] [true [h l]]]
+           `(bar.ops/add-from-registers-address-and-carry ~r ~h ~l))))
